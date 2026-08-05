@@ -13,6 +13,7 @@
 		B10000000000000000000005 /* DockerResolver.test.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* DockerResolver.test.swift */; };
 		B10000000000000000000006 /* PortListSnapshot.test.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* PortListSnapshot.test.swift */; };
 		B10000000000000000000007 /* ResolvedPort.test.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* ResolvedPort.test.swift */; };
+		B10000000000000000000008 /* MarinaSettings.test.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* MarinaSettings.test.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,12 +36,14 @@
 		C10000000000000000000005 /* DockerResolver.test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marina/Core/DockerResolver/DockerResolver.test.swift; sourceTree = SOURCE_ROOT; };
 		C10000000000000000000006 /* PortListSnapshot.test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marina/Features/Ports/PortListSnapshot.test.swift; sourceTree = SOURCE_ROOT; };
 		C10000000000000000000007 /* ResolvedPort.test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marina/Core/Models/ResolvedPort.test.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000008 /* MarinaSettings.test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marina/App/MarinaSettings.test.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		D10000000000000000000001 /* App test exclusions */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				App/MarinaSettings.test.swift,
 				Core/DockerResolver/DockerInspectParser.test.swift,
 				Core/DockerResolver/DockerPortMatcher.test.swift,
 				Core/DockerResolver/DockerResolver.test.swift,
@@ -102,6 +105,7 @@
 				C10000000000000000000005 /* DockerResolver.test.swift */,
 				C10000000000000000000006 /* PortListSnapshot.test.swift */,
 				C10000000000000000000007 /* ResolvedPort.test.swift */,
+				C10000000000000000000008 /* MarinaSettings.test.swift */,
 			);
 			name = "Test Sources";
 			sourceTree = "<group>";
@@ -177,7 +181,7 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		A10000000000000000000012 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		A10000000000000000000016 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B10000000000000000000001 /* LsofParser.test.swift in Sources */, B10000000000000000000002 /* DockerInspectParser.test.swift in Sources */, B10000000000000000000003 /* DockerPortMatcher.test.swift in Sources */, B10000000000000000000004 /* ServiceResolver.test.swift in Sources */, B10000000000000000000005 /* DockerResolver.test.swift in Sources */, B10000000000000000000006 /* PortListSnapshot.test.swift in Sources */, B10000000000000000000007 /* ResolvedPort.test.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
+		A10000000000000000000016 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B10000000000000000000001 /* LsofParser.test.swift in Sources */, B10000000000000000000002 /* DockerInspectParser.test.swift in Sources */, B10000000000000000000003 /* DockerPortMatcher.test.swift in Sources */, B10000000000000000000004 /* ServiceResolver.test.swift in Sources */, B10000000000000000000005 /* DockerResolver.test.swift in Sources */, B10000000000000000000006 /* PortListSnapshot.test.swift in Sources */, B10000000000000000000007 /* ResolvedPort.test.swift in Sources */, B10000000000000000000008 /* MarinaSettings.test.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */

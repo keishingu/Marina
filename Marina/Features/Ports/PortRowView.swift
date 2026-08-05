@@ -34,6 +34,15 @@ struct PortRowView: View {
                         .lineLimit(1)
                 }
 
+                if settings.showWorkingDirectory, let workingDirectory {
+                    Label(workingDirectory, systemImage: "folder")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .help(workingDirectory)
+                }
+
                 if settings.showDockerDetails, let dockerLine {
                     Label(dockerLine, systemImage: "shippingbox")
                         .font(.caption2)
@@ -81,6 +90,14 @@ struct PortRowView: View {
         }
         guard let mapping = mappings.first else { return container.image }
         return "→ container :\(mapping.containerPort) · \(container.image)"
+    }
+
+    private var workingDirectory: String? {
+        if let composeDirectory = port.primaryDockerContainer?.compose.workingDirectory,
+           !composeDirectory.isEmpty {
+            return composeDirectory
+        }
+        return port.listener.process.workingDirectory
     }
 
     private var actionsMenu: some View {

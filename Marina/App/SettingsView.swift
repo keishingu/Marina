@@ -29,6 +29,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                 Toggle("Show PID", isOn: $settings.showPID)
                 Toggle("Show Bind Address", isOn: $settings.showBindAddress)
+                Toggle("Show Working Directory", isOn: $settings.showWorkingDirectory)
             }
 
             Section("Docker") {

@@ -5,12 +5,21 @@ struct ServiceIcon: View {
     let isDocker: Bool
 
     var body: some View {
-        Image(systemName: symbolName)
-            .font(.system(size: 14, weight: .medium))
-            .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(isDocker ? Color.blue : Color.primary)
-            .frame(width: 30, height: 30)
-            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        Group {
+            if let assetName {
+                Image(assetName)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(7)
+            } else {
+                Image(systemName: symbolName)
+                    .font(.system(size: 15, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(isDocker ? Color.blue : Color.primary)
+            }
+        }
+            .frame(width: 34, height: 34)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             .overlay(alignment: .bottomTrailing) {
                 if isDocker {
                     Image(systemName: "shippingbox.fill")
@@ -25,6 +34,27 @@ struct ServiceIcon: View {
             .accessibilityLabel("\(kind.displayName) service")
     }
 
+    private var assetName: String? {
+        switch kind {
+        case .nextJS: "ServiceLogoNextJS"
+        case .nodeJS: "ServiceLogoNodeJS"
+        case .vite: "ServiceLogoVite"
+        case .python, .uvicorn: "ServiceLogoPython"
+        case .django: "ServiceLogoDjango"
+        case .ruby: "ServiceLogoRuby"
+        case .rails: "ServiceLogoRails"
+        case .postgreSQL: "ServiceLogoPostgreSQL"
+        case .mySQL: "ServiceLogoMySQL"
+        case .redis: "ServiceLogoRedis"
+        case .nginx: "ServiceLogoNGINX"
+        case .caddy: "ServiceLogoCaddy"
+        case .java: "ServiceLogoJava"
+        case .go: "ServiceLogoGo"
+        case .docker: "ServiceLogoDocker"
+        case .unknown: nil
+        }
+    }
+
     private var symbolName: String {
         switch kind {
         case .nextJS, .vite, .nginx, .caddy: "globe"
@@ -37,4 +67,5 @@ struct ServiceIcon: View {
         case .unknown: "terminal"
         }
     }
+
 }

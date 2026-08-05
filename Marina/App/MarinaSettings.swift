@@ -24,6 +24,7 @@ final class MarinaSettings: ObservableObject {
         static let confirmBeforeStopping = "confirmBeforeStopping"
         static let showPID = "showPID"
         static let showBindAddress = "showBindAddress"
+        static let showWorkingDirectory = "showWorkingDirectory"
         static let showDockerDetails = "showDockerDetails"
         static let groupDockerPorts = "groupDockerPorts"
     }
@@ -38,6 +39,7 @@ final class MarinaSettings: ObservableObject {
     @Published var confirmBeforeStopping: Bool { didSet { defaults.set(confirmBeforeStopping, forKey: Key.confirmBeforeStopping) } }
     @Published var showPID: Bool { didSet { defaults.set(showPID, forKey: Key.showPID) } }
     @Published var showBindAddress: Bool { didSet { defaults.set(showBindAddress, forKey: Key.showBindAddress) } }
+    @Published var showWorkingDirectory: Bool { didSet { defaults.set(showWorkingDirectory, forKey: Key.showWorkingDirectory) } }
     @Published var showDockerDetails: Bool { didSet { defaults.set(showDockerDetails, forKey: Key.showDockerDetails) } }
     @Published var groupDockerPorts: Bool { didSet { defaults.set(groupDockerPorts, forKey: Key.groupDockerPorts) } }
     @Published private(set) var launchAtLoginError: String?
@@ -53,6 +55,7 @@ final class MarinaSettings: ObservableObject {
         confirmBeforeStopping = defaults.object(forKey: Key.confirmBeforeStopping) as? Bool ?? true
         showPID = defaults.object(forKey: Key.showPID) as? Bool ?? true
         showBindAddress = defaults.object(forKey: Key.showBindAddress) as? Bool ?? true
+        showWorkingDirectory = defaults.object(forKey: Key.showWorkingDirectory) as? Bool ?? false
         showDockerDetails = defaults.object(forKey: Key.showDockerDetails) as? Bool ?? true
         groupDockerPorts = defaults.object(forKey: Key.groupDockerPorts) as? Bool ?? false
     }

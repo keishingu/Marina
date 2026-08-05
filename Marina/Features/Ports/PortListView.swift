@@ -18,7 +18,7 @@ struct PortListView: View {
             }
         }
         .frame(width: 420)
-        .frame(maxHeight: 560)
+        .frame(maxHeight: 680)
         .background(.regularMaterial)
         .onAppear {
             viewModel.startMonitoring()
@@ -215,7 +215,7 @@ struct PortListView: View {
                     }
                 }
             }
-            .frame(maxHeight: 430)
+            .frame(maxHeight: 550)
         }
     }
 
