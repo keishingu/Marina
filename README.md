@@ -51,7 +51,7 @@ Marina/
 │   ├── PortScanner/        lsof field parser and normalization
 │   ├── ProcessResolver/    ps/lsof process metadata enrichment
 │   └── ServiceResolver/    Conservative service inference
-└── DesignSystem/           SF Symbol-based icons and status indicators
+└── DesignSystem/           Service logos, SF Symbol fallbacks, status indicators
 ```
 
 SwiftUI owns presentation only. External commands are behind `CommandRunning`; parsers and resolvers are value types and can be tested with fixture output. `PortListViewModel` runs the port and Docker scans concurrently, prevents overlapping refreshes, and retains the last successful Docker container data when a later Docker refresh fails.
@@ -90,6 +90,12 @@ The inspect JSON provides host IP/port, container port, protocol, running status
 TCP host port and compatible bind IP are matched against each `ListeningPort`. A wildcard bind is compatible with a concrete Docker host IP. Multiple matching containers remain explicit candidates; Marina does not silently select one. A single match replaces `com.docker.backend`-style presentation with Compose/container information.
 
 Docker Desktop is only required when Docker enrichment or container actions are used. A missing CLI, stopped daemon, permission error, or malformed JSON is shown as a Docker-specific warning while ordinary listeners remain visible.
+
+## Service logos and third-party marks
+
+Recognized services use monochrome or restrained brand-color SVG marks from Simple Icons 16.21.0. Unknown services continue to use an SF Symbol, and Docker state is shown by a separate shipping-box badge so a brand color is never the only status signal.
+
+Simple Icons is distributed under CC0-1.0, but individual marks may remain subject to copyright, trademark, and their owners' usage terms. Marina uses them only to identify detected technologies and does not imply endorsement, affiliation, or sponsorship. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the bundled Simple Icons license and disclaimer under `Marina/Resources/Licenses`.
 
 ## App Sandbox and permissions
 

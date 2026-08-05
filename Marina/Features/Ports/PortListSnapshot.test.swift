@@ -68,7 +68,7 @@ final class PortListSnapshotTests: XCTestCase {
     private func render<Content: View>(
         _ content: Content,
         to outputURL: URL,
-        height: CGFloat = 430
+        height: CGFloat = 650
     ) throws -> Int {
         let hostingView = NSHostingView(rootView: content)
         hostingView.frame = NSRect(x: 0, y: 0, width: 420, height: height)
@@ -95,9 +95,13 @@ private struct SnapshotPortScanner: PortScanning {
     func scan() async throws -> PortScanSnapshot {
         PortScanSnapshot(listeners: [
             listener(pid: 48_291, name: "node", command: "next dev", port: 3_000, address: "127.0.0.1"),
+            listener(pid: 40_000, name: "ruby", command: "bin/rails server -p 4000", port: 4_000, address: "127.0.0.1"),
+            listener(pid: 51_730, name: "node", command: "vite --host 127.0.0.1", port: 5_173, address: "127.0.0.1"),
             listener(pid: 910, name: "com.docker.backend", command: nil, port: 5_432, address: "0.0.0.0"),
             listener(pid: 63_790, name: "redis-server", command: "redis-server *:6379", port: 6_379, address: "127.0.0.1"),
-            listener(pid: 8_000, name: "Python", command: "uvicorn main:app", port: 8_000, address: "127.0.0.1")
+            listener(pid: 8_000, name: "Python", command: "uvicorn main:app", port: 8_000, address: "127.0.0.1"),
+            listener(pid: 8_001, name: "python", command: "python manage.py runserver 8001", port: 8_001, address: "127.0.0.1"),
+            listener(pid: 8_080, name: "nginx", command: "nginx -g daemon off;", port: 8_080, address: "0.0.0.0")
         ], warnings: [])
     }
 
