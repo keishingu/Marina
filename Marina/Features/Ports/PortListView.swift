@@ -6,10 +6,43 @@ struct PortListView: View {
     @Environment(\.openSettings) private var openSettings
     @State private var selectedPort: ResolvedPort?
     @State private var confirmation: Confirmation?
+    @State private var searchText = ""
+    @FocusState private var searchIsFocused: Bool
 
     var body: some View {
+        Group {
+            if let selectedPort {
+                PortDetailView(port: selectedPort, onDone: showPortList)
+            } else {
+                portList
+            }
+        }
+        .frame(width: 420)
+        .frame(maxHeight: 560)
+        .background(.regularMaterial)
+        .onAppear {
+            viewModel.startMonitoring()
+            focusSearch()
+        }
+        .onDisappear {
+            selectedPort = nil
+            searchText = ""
+            searchIsFocused = false
+            viewModel.stopMonitoring()
+        }
+        .onChange(of: settings.refreshInterval) { _, _ in viewModel.restartMonitoring() }
+        .alert(item: $confirmation, content: confirmationAlert)
+        .alert("Action failed", isPresented: actionErrorIsPresented) {
+            Button("OK") { viewModel.actionError = nil }
+        } message: {
+            Text(viewModel.actionError ?? "The action could not be completed.")
+        }
+    }
+
+    private var portList: some View {
         VStack(spacing: 0) {
             header
+            searchField
             Divider()
 
             if let scanError = viewModel.scanError {
@@ -43,29 +76,17 @@ struct PortListView: View {
             Divider()
             footer
         }
-        .frame(width: 420)
-        .frame(maxHeight: 560)
-        .background(.regularMaterial)
-        .onAppear { viewModel.startMonitoring() }
-        .onDisappear { viewModel.stopMonitoring() }
-        .onChange(of: settings.refreshInterval) { _, _ in viewModel.restartMonitoring() }
-        .sheet(item: $selectedPort) { PortDetailView(port: $0) }
-        .alert(item: $confirmation, content: confirmationAlert)
-        .alert("Action failed", isPresented: actionErrorIsPresented) {
-            Button("OK") { viewModel.actionError = nil }
-        } message: {
-            Text(viewModel.actionError ?? "The action could not be completed.")
-        }
     }
 
-    private var visiblePorts: [ResolvedPort] { viewModel.filteredPorts() }
+    private var visiblePorts: [ResolvedPort] { viewModel.filteredPorts(matching: searchText) }
+    private var unsearchedPorts: [ResolvedPort] { viewModel.filteredPorts() }
 
     private var header: some View {
         HStack(spacing: 10) {
             MarinaIcon(size: 30)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Marina").font(.headline)
-                Text("\(visiblePorts.count) listening · \(viewModel.dockerContainerCount) containers")
+                Text(portCountSummary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .contentTransition(.numericText())
@@ -96,12 +117,66 @@ struct PortListView: View {
         .padding(.vertical, 13)
     }
 
+    private var searchField: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+            TextField("Filter ports and services", text: $searchText)
+                .textFieldStyle(.plain)
+                .focused($searchIsFocused)
+                .onExitCommand { searchText = "" }
+                .accessibilityLabel("Filter listening ports")
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                    searchIsFocused = true
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Clear filter")
+                .accessibilityLabel("Clear filter")
+            }
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 7)
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .padding(.horizontal, 14)
+        .padding(.bottom, 10)
+    }
+
+    private var portCountSummary: String {
+        if searchText.isEmpty {
+            return "\(visiblePorts.count) listening · \(viewModel.dockerContainerCount) containers"
+        }
+        return "\(visiblePorts.count) of \(unsearchedPorts.count) listening · \(viewModel.dockerContainerCount) containers"
+    }
+
     @ViewBuilder
     private var content: some View {
-        if visiblePorts.isEmpty && viewModel.scanError == nil && !viewModel.isRefreshing {
+        if visiblePorts.isEmpty && !searchText.isEmpty && viewModel.scanError == nil {
             VStack(spacing: 10) {
-                Image(systemName: "anchor")
-                    .font(.system(size: 30, weight: .light))
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 28, weight: .light))
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+                Text("No matching services").font(.headline)
+                Text("Try another port, process, or service name.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Button("Clear Filter") {
+                    searchText = ""
+                    searchIsFocused = true
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 220)
+            .padding(24)
+        } else if visiblePorts.isEmpty && viewModel.scanError == nil && !viewModel.isRefreshing {
+            VStack(spacing: 10) {
+                MarinaAnchorSymbol()
+                    .frame(width: 30, height: 30)
                     .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
                 Text("No services are docked").font(.headline)
@@ -189,6 +264,19 @@ struct PortListView: View {
             get: { viewModel.actionError != nil },
             set: { if !$0 { viewModel.actionError = nil } }
         )
+    }
+
+    private func focusSearch() {
+        Task { @MainActor in
+            await Task.yield()
+            guard selectedPort == nil else { return }
+            searchIsFocused = true
+        }
+    }
+
+    private func showPortList() {
+        selectedPort = nil
+        focusSearch()
     }
 
     private func requestTermination(_ port: ResolvedPort, force: Bool) {

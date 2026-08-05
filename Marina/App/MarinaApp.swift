@@ -14,7 +14,8 @@ struct MarinaApp: App {
             Label {
                 Text(String(appState.portListViewModel.filteredPorts().count))
             } icon: {
-                Image(systemName: "sailboat.fill")
+                Image(nsImage: MarinaMenuBarIcon.image)
+                    .renderingMode(.template)
             }
             .accessibilityLabel("Marina, \(appState.portListViewModel.filteredPorts().count) listening ports")
         }

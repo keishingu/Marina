@@ -37,13 +37,14 @@ final class PortListViewModel: ObservableObject {
 
     var dockerContainerCount: Int { lastKnownContainers.count }
 
-    func filteredPorts() -> [ResolvedPort] {
+    func filteredPorts(matching searchText: String = "") -> [ResolvedPort] {
         ports.filter { port in
             let isSystem = port.listener.process.user == "root" ||
                 port.listener.process.executablePath?.hasPrefix("/System/") == true ||
                 port.listener.process.executablePath?.hasPrefix("/usr/sbin/") == true
             return (settings.showSystemServices || !isSystem) &&
-                (!settings.showLoopbackOnly || port.listener.isLoopbackOnly)
+                (!settings.showLoopbackOnly || port.listener.isLoopbackOnly) &&
+                port.matches(searchText: searchText)
         }
     }
 

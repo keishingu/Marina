@@ -37,9 +37,41 @@ final class PortListSnapshotTests: XCTestCase {
         XCTAssertGreaterThan(lightSize, 10_000)
     }
 
-    private func render<Content: View>(_ content: Content, to outputURL: URL) throws -> Int {
+    func test_詳細を同じパネル幅で描画する() async throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: "MarinaDetailSnapshotTests"))
+        defaults.removePersistentDomain(forName: "MarinaDetailSnapshotTests")
+        let settings = MarinaSettings(defaults: defaults)
+        let runner = MockCommandRunner(results: [])
+        let viewModel = PortListViewModel(
+            settings: settings,
+            portScanner: SnapshotPortScanner(),
+            dockerResolver: SnapshotDockerResolver(),
+            actionController: PortActionController(runner: runner, dockerExecutableURL: nil)
+        )
+        await viewModel.refresh()
+        let port = try XCTUnwrap(viewModel.filteredPorts().first)
+        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appending(path: "marina-detail.png")
+
+        let size = try render(
+            PortDetailView(port: port, onDone: {})
+                .frame(width: 420)
+                .background(Color.white)
+                .preferredColorScheme(.light),
+            to: outputURL,
+            height: 560
+        )
+
+        XCTAssertGreaterThan(size, 10_000)
+    }
+
+    private func render<Content: View>(
+        _ content: Content,
+        to outputURL: URL,
+        height: CGFloat = 430
+    ) throws -> Int {
         let hostingView = NSHostingView(rootView: content)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 420, height: 430)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 420, height: height)
         let window = NSWindow(
             contentRect: hostingView.frame,
             styleMask: [.titled, .fullSizeContentView],
