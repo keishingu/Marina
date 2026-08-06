@@ -9,7 +9,7 @@ readonly derived_data_directory="${output_directory}/DerivedData"
 readonly app_path="${derived_data_directory}/Build/Products/Release/Marina.app"
 readonly archive_path="${output_directory}/Marina-macos-universal.zip"
 readonly checksum_path="${archive_path}.sha256"
-readonly build_number="${BUILD_NUMBER:-1}"
+readonly build_number="${BUILD_NUMBER:?error: BUILD_NUMBER が指定されていません}"
 
 mkdir -p "${output_directory}"
 
