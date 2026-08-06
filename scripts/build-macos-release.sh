@@ -8,8 +8,13 @@ readonly output_directory="${project_directory}/build/release"
 readonly derived_data_directory="${output_directory}/DerivedData"
 readonly app_path="${derived_data_directory}/Build/Products/Release/Marina.app"
 readonly archive_path="${output_directory}/Marina-macos-universal.zip"
-readonly checksum_path="${archive_path}.sha256"
 readonly build_number="${BUILD_NUMBER:?error: BUILD_NUMBER が指定されていません}"
+readonly signing_identity="${SIGNING_IDENTITY:?error: SIGNING_IDENTITY が指定されていません}"
+
+if [[ "${signing_identity}" != "Developer ID Application:"* ]]; then
+  echo "error: Developer ID Application証明書ではありません: ${signing_identity}" >&2
+  exit 1
+fi
 
 mkdir -p "${output_directory}"
 
@@ -44,15 +49,19 @@ if [[ " ${architectures} " != *" arm64 "* || " ${architectures} " != *" x86_64 "
   exit 1
 fi
 
-codesign --force --sign - --options runtime "${app_path}"
+codesign \
+  --force \
+  --sign "${signing_identity}" \
+  --options runtime \
+  --timestamp \
+  --verbose \
+  "${app_path}"
 codesign --verify --deep --strict --verbose=2 "${app_path}"
+codesign --display --verbose=4 "${app_path}"
 
-ditto -c -k --sequesterRsrc --keepParent "${app_path}" "${archive_path}"
-(
-  cd "${output_directory}"
-  shasum -a 256 "$(basename "${archive_path}")" > "$(basename "${checksum_path}")"
-)
+"${script_directory}/package-macos-release.sh"
 
 echo "Created ${archive_path}"
 echo "Architectures: ${architectures}"
 echo "App icon: ${icon_path}"
+echo "Signing identity: ${signing_identity}"
