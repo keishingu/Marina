@@ -100,7 +100,7 @@ struct PortActionController: Sendable {
         do {
             verification = try await runner.run(
                 executableURL: URL(fileURLWithPath: "/bin/ps"),
-                arguments: ["-p", String(process.pid), "-o", "comm="]
+                arguments: ["-p", String(process.pid), "-o", "state=", "-o", "comm="]
             )
         } catch CommandRunnerError.nonZeroExit(_, let status, _) where status == 1 {
             return true
@@ -108,9 +108,15 @@ struct PortActionController: Sendable {
             throw PortActionError.terminationVerificationFailed(error.localizedDescription)
         }
 
-        let currentName = URL(
-            fileURLWithPath: verification.stdoutString.trimmingCharacters(in: .whitespacesAndNewlines)
-        ).lastPathComponent
+        let fields = verification.stdoutString.split(
+            maxSplits: 1,
+            whereSeparator: { $0.isWhitespace }
+        )
+        guard fields.count == 2 else {
+            throw PortActionError.terminationVerificationFailed("ps returned an unexpected process state.")
+        }
+        guard !fields[0].hasPrefix("Z") else { return true }
+        let currentName = URL(fileURLWithPath: String(fields[1])).lastPathComponent
         return !isSameProcessName(currentName, process.name)
     }
 

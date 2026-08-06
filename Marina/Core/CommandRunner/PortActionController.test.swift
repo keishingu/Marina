@@ -6,9 +6,9 @@ final class PortActionControllerTests: XCTestCase {
         let runner = MockCommandRunner(results: [
             .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n")),
             .success(output()),
-            .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n")),
-            .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n")),
-            .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n"))
+            .success(output("S /Applications/Electron.app/Contents/MacOS/Electron\n")),
+            .success(output("S /Applications/Electron.app/Contents/MacOS/Electron\n")),
+            .success(output("S /Applications/Electron.app/Contents/MacOS/Electron\n"))
         ])
         let controller = PortActionController(
             runner: runner,
@@ -34,8 +34,8 @@ final class PortActionControllerTests: XCTestCase {
         let runner = MockCommandRunner(results: [
             .success(output("Electron\n")),
             .success(output()),
-            .success(output("Electron\n")),
-            .success(output("Electron\n")),
+            .success(output("S Electron\n")),
+            .success(output("S Electron\n")),
             .failure(processMissing)
         ])
         let controller = PortActionController(
@@ -75,7 +75,23 @@ final class PortActionControllerTests: XCTestCase {
         let runner = MockCommandRunner(results: [
             .success(output("Electron\n")),
             .success(output()),
-            .success(output("replacement-process\n"))
+            .success(output("S replacement-process\n"))
+        ])
+        let controller = PortActionController(
+            runner: runner,
+            dockerExecutableURL: nil,
+            terminationCheckInterval: .zero,
+            terminationCheckAttempts: 1
+        )
+
+        try await controller.terminate(process)
+    }
+
+    func test_SIGTERM後のゾンビプロセスは終了済みとして扱う() async throws {
+        let runner = MockCommandRunner(results: [
+            .success(output("Electron\n")),
+            .success(output()),
+            .success(output("Z+ Electron\n"))
         ])
         let controller = PortActionController(
             runner: runner,
