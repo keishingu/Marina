@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct PortListView: View {
@@ -104,14 +105,31 @@ struct PortListView: View {
             .help("Refresh ports (⌘R)")
             .accessibilityLabel(viewModel.isRefreshing ? "Refreshing ports" : "Refresh ports")
 
-            Button {
-                openSettings()
+            Menu {
+                Button {
+                    openSettings()
+                } label: {
+                    Label("Settings…", systemImage: "gearshape")
+                }
+                .keyboardShortcut(",", modifiers: .command)
+
+                Divider()
+
+                Button(role: .destructive) {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Label("Quit Marina", systemImage: "power")
+                }
+                .keyboardShortcut("q", modifiers: .command)
             } label: {
-                Image(systemName: "gearshape")
+                Image(systemName: "ellipsis.circle")
                     .frame(width: 24, height: 24)
             }
-            .buttonStyle(.plain)
-            .help("Open Settings")
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Marina menu")
+            .accessibilityLabel("Marina menu")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
