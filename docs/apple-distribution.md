@@ -78,6 +78,14 @@ base64 -i AuthKey_KEYID.p8 \
 
 passwordは2番目のコマンドが表示するpromptへ入力します。`.p12`、`.p8`、password、base64文字列をrepositoryへcommitしないでください。
 
+## merge前の実notarization確認
+
+VariablesとSecretsを登録した後、GitHub Actionsの「Release macOS app」から`Run workflow`を選び、署名・notarization対応ブランチを指定して手動実行します。
+
+feature branchの手動実行ではGitHub Releaseを作成せず、Developer ID署名、notarization、staple、再packageまでを実行し、7日間保持される`Marina-macos-notarized-*` artifactを作成します。
+
+workflowが成功したらartifactをdownloadし、「配布物の確認」のコマンドを実行してください。実機で通常起動できることも確認してから`main`へmergeします。
+
 ## Release workflow
 
 `main`へのpushで次を実行します。
@@ -91,7 +99,7 @@ passwordは2番目のコマンドが表示するpromptへ入力します。`.p12
 7. `Accepted`の明示確認
 8. notarization ticketのstapleと検証
 9. staple済みアプリからZIPとchecksumを再生成
-10. GitHub Releaseの公開
+10. feature branchの手動実行では検証用artifact、`main`ではGitHub Releaseを公開
 11. 一時Keychainの削除
 
 設定が不足している場合やnotarizationがAccepted以外の場合は、Releaseを公開せずworkflowを失敗させます。
