@@ -6,12 +6,15 @@ final class PortActionControllerTests: XCTestCase {
         let runner = MockCommandRunner(results: [
             .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n")),
             .success(output()),
+            .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n")),
+            .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n")),
             .success(output("/Applications/Electron.app/Contents/MacOS/Electron\n"))
         ])
         let controller = PortActionController(
             runner: runner,
             dockerExecutableURL: nil,
-            terminationGracePeriod: .zero
+            terminationCheckInterval: .zero,
+            terminationCheckAttempts: 3
         )
 
         do {
@@ -27,12 +30,28 @@ final class PortActionControllerTests: XCTestCase {
         }
     }
 
-    func test_SIGTERM後にPIDが消えた場合は成功する() async throws {
-        let processMissing = CommandRunnerError.nonZeroExit(
-            executable: "ps",
-            status: 1,
-            message: ""
+    func test_SIGTERM処理中のプロセスは期限までポーリングする() async throws {
+        let runner = MockCommandRunner(results: [
+            .success(output("Electron\n")),
+            .success(output()),
+            .success(output("Electron\n")),
+            .success(output("Electron\n")),
+            .failure(processMissing)
+        ])
+        let controller = PortActionController(
+            runner: runner,
+            dockerExecutableURL: nil,
+            terminationCheckInterval: .zero,
+            terminationCheckAttempts: 3
         )
+
+        try await controller.terminate(process)
+
+        let invocations = await runner.invocations
+        XCTAssertEqual(invocations.map(\.executableURL.path), ["/bin/ps", "/bin/kill", "/bin/ps", "/bin/ps", "/bin/ps"])
+    }
+
+    func test_SIGTERM後にPIDが消えた場合は成功する() async throws {
         let runner = MockCommandRunner(results: [
             .success(output("Electron\n")),
             .success(output()),
@@ -41,7 +60,8 @@ final class PortActionControllerTests: XCTestCase {
         let controller = PortActionController(
             runner: runner,
             dockerExecutableURL: nil,
-            terminationGracePeriod: .zero
+            terminationCheckInterval: .zero,
+            terminationCheckAttempts: 1
         )
 
         try await controller.terminate(process)
@@ -60,7 +80,8 @@ final class PortActionControllerTests: XCTestCase {
         let controller = PortActionController(
             runner: runner,
             dockerExecutableURL: nil,
-            terminationGracePeriod: .zero
+            terminationCheckInterval: .zero,
+            terminationCheckAttempts: 1
         )
 
         try await controller.terminate(process)
@@ -76,6 +97,10 @@ final class PortActionControllerTests: XCTestCase {
             parentPID: nil,
             workingDirectory: nil
         )
+    }
+
+    private var processMissing: CommandRunnerError {
+        .nonZeroExit(executable: "ps", status: 1, message: "")
     }
 
     private func output(_ text: String = "") -> CommandOutput {

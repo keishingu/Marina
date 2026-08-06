@@ -27,16 +27,20 @@ enum PortActionError: LocalizedError, Equatable, Sendable {
 struct PortActionController: Sendable {
     private let runner: any CommandRunning
     private let dockerExecutableURL: URL?
-    private let terminationGracePeriod: Duration
+    private let terminationCheckInterval: Duration
+    private let terminationCheckAttempts: Int
 
     init(
         runner: any CommandRunning,
         dockerExecutableURL: URL?,
-        terminationGracePeriod: Duration = .milliseconds(500)
+        terminationCheckInterval: Duration = .milliseconds(200),
+        terminationCheckAttempts: Int = 10
     ) {
+        precondition(terminationCheckAttempts > 0)
         self.runner = runner
         self.dockerExecutableURL = dockerExecutableURL
-        self.terminationGracePeriod = terminationGracePeriod
+        self.terminationCheckInterval = terminationCheckInterval
+        self.terminationCheckAttempts = terminationCheckAttempts
     }
 
     func terminate(_ process: ProcessIdentity, force: Bool = false) async throws {
@@ -58,7 +62,6 @@ struct PortActionController: Sendable {
             executableURL: URL(fileURLWithPath: "/bin/kill"),
             arguments: [force ? "-KILL" : "-TERM", String(process.pid)]
         )
-        try await Task.sleep(for: terminationGracePeriod)
         try await verifyProcessTerminated(process, signal: signal)
     }
 
@@ -85,6 +88,14 @@ struct PortActionController: Sendable {
     }
 
     private func verifyProcessTerminated(_ process: ProcessIdentity, signal: String) async throws {
+        for _ in 0..<terminationCheckAttempts {
+            try await Task.sleep(for: terminationCheckInterval)
+            if try await processHasTerminated(process) { return }
+        }
+        throw PortActionError.processStillRunning(name: process.name, pid: process.pid, signal: signal)
+    }
+
+    private func processHasTerminated(_ process: ProcessIdentity) async throws -> Bool {
         let verification: CommandOutput
         do {
             verification = try await runner.run(
@@ -92,7 +103,7 @@ struct PortActionController: Sendable {
                 arguments: ["-p", String(process.pid), "-o", "comm="]
             )
         } catch CommandRunnerError.nonZeroExit(_, let status, _) where status == 1 {
-            return
+            return true
         } catch {
             throw PortActionError.terminationVerificationFailed(error.localizedDescription)
         }
@@ -100,8 +111,7 @@ struct PortActionController: Sendable {
         let currentName = URL(
             fileURLWithPath: verification.stdoutString.trimmingCharacters(in: .whitespacesAndNewlines)
         ).lastPathComponent
-        guard isSameProcessName(currentName, process.name) else { return }
-        throw PortActionError.processStillRunning(name: process.name, pid: process.pid, signal: signal)
+        return !isSameProcessName(currentName, process.name)
     }
 
     private func isSameProcessName(_ currentName: String, _ expectedName: String) -> Bool {
