@@ -65,14 +65,38 @@ jobs:
         run: |
           set -euo pipefail
 
-          if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
-            gh release create "${RELEASE_TAG}" \
+          asset_paths=(
+            build/release/Marina-macos-universal.zip
+            build/release/Marina-macos-universal.zip.sha256
+          )
+
+          release_state="$(
+            gh api graphql \
+              -f query='query($owner:String!,$repository:String!,$tag:String!){repository(owner:$owner,name:$repository){release(tagName:$tag){isDraft}}}' \
+              -f owner="${GITHUB_REPOSITORY%%/*}" \
+              -f repository="${GITHUB_REPOSITORY#*/}" \
+              -f tag="${RELEASE_TAG}" \
+              --jq '.data.repository.release | if . == null then "missing" elif .isDraft then "draft" else "published" end'
+          )"
+
+          if [[ "${release_state}" == "missing" ]]; then
+            gh release create "${RELEASE_TAG}" "${asset_paths[@]}" \
               --target "${GITHUB_SHA}" \
               --title "${RELEASE_TITLE}" \
               --generate-notes
+            exit 0
           fi
 
-          gh release upload "${RELEASE_TAG}" \
-            build/release/Marina-macos-universal.zip \
-            build/release/Marina-macos-universal.zip.sha256 \
-            --clobber
+          existing_assets="$(gh release view "${RELEASE_TAG}" --json assets --jq '.assets[].name')"
+          for asset_path in "${asset_paths[@]}"; do
+            asset_name="$(basename "${asset_path}")"
+            if grep -Fxq "${asset_name}" <<< "${existing_assets}"; then
+              echo "Asset already exists: ${asset_name}"
+            else
+              gh release upload "${RELEASE_TAG}" "${asset_path}"
+            fi
+          done
+
+          if [[ "${release_state}" == "draft" ]]; then
+            gh release edit "${RELEASE_TAG}" --draft=false
+          fi
