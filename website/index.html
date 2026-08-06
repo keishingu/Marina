@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07111d" />
+    <meta
+      name="description"
+      content="Marina is a native macOS menu bar utility for seeing local TCP ports, owning processes, and Docker Compose mappings in one calm panel."
+    />
+    <meta property="og:title" content="Marina — See what's listening" />
+    <meta
+      property="og:description"
+      content="Every local port, process, and container—clearly docked in one place."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://keishingu.github.io/Marina/" />
+    <meta property="og:image" content="https://keishingu.github.io/Marina/app-icon.png" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/app-icon.png" />
+    <title>Marina — See what's listening</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Marina",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "macOS 14 or later",
+        "downloadUrl": "https://github.com/keishingu/Marina/releases/latest/download/Marina-macos-universal.zip",
+        "codeRepository": "https://github.com/keishingu/Marina"
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Marina home">
+        <img src="/app-icon.png" width="44" height="44" alt="" />
+        <span>Marina</span>
+      </a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="https://github.com/keishingu/Marina">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <canvas id="harbor-canvas" aria-hidden="true"></canvas>
+        <div class="hero-fallback" aria-hidden="true"></div>
+        <div class="hero-vignette" aria-hidden="true"></div>
+        <div class="hero-content shell">
+          <h1 id="hero-title">See what’s<br />listening.</h1>
+          <p>
+            Every local port, process, and container—clearly docked in one place.
+          </p>
+          <div class="hero-actions" aria-label="Download options">
+            <a
+              class="button button-primary"
+              href="https://github.com/keishingu/Marina/releases/latest/download/Marina-macos-universal.zip"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M16.7 12.8c0-2.5 2-3.7 2.1-3.8a4.5 4.5 0 0 0-3.5-1.9c-1.5-.2-2.9.9-3.6.9-.7 0-1.8-.9-3-.9a4.7 4.7 0 0 0-4 2.4c-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.8 2.5 3.1 2.4 1.2 0 1.7-.8 3.3-.8 1.5 0 2 .8 3.3.8 1.4 0 2.2-1.2 3-2.4a10.5 10.5 0 0 0 1.4-2.9 4.2 4.2 0 0 1-3.3-3.4ZM14.3 5.5A4.3 4.3 0 0 0 15.4 2a4.5 4.5 0 0 0-3 1.7 4 4 0 0 0-1.1 3.4 3.7 3.7 0 0 0 3-1.6Z" />
+              </svg>
+              Download for macOS
+            </a>
+            <a class="text-link" href="https://github.com/keishingu/Marina">
+              View on GitHub <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+          <p class="compatibility">Signed &amp; notarized · macOS 14 or later · Apple Silicon &amp; Intel</p>
+        </div>
+        <div class="scroll-cue" aria-hidden="true">
+          <span></span>
+        </div>
+      </section>
+
+      <section class="product-section" id="features" aria-labelledby="product-title">
+        <div class="shell product-layout">
+          <div class="section-copy product-copy">
+            <h2 id="product-title">Know what owns every port.</h2>
+            <p>
+              Native processes and Docker containers, together with the service,
+              PID, bind address, and mapping behind every port.
+            </p>
+          </div>
+
+          <div class="product-stage">
+            <svg class="blueprint blueprint-ship" viewBox="0 0 180 760" aria-hidden="true">
+              <g>
+                <path d="M90 16 133 58l20 108v398l-20 118-43 62-43-62-20-118V166L47 58Z" />
+                <path d="M90 16v728M47 58h86M27 166h126M27 564h126" />
+                <rect x="49" y="102" width="82" height="118" />
+                <rect x="41" y="248" width="98" height="210" />
+                <rect x="51" y="486" width="78" height="108" />
+                <path d="M58 272h64M58 304h64M58 336h64M58 368h64M58 400h64M58 432h64" />
+                <circle cx="90" cy="635" r="28" />
+                <path d="M62 635h56M90 607v56" />
+              </g>
+            </svg>
+
+            <figure class="product-shot">
+              <img
+                src="/marina-panel.png"
+                width="840"
+                height="1300"
+                alt="Marina showing local Next.js, Rails, Vite, PostgreSQL, Redis, Python, and Django listeners with their ports and owners"
+              />
+            </figure>
+
+            <svg class="blueprint blueprint-berths" viewBox="0 0 260 760" aria-hidden="true">
+              <g>
+                <rect x="18" y="24" width="24" height="712" />
+                <path d="M42 88h184M42 192h184M42 296h184M42 400h184M42 504h184M42 608h184" />
+                <path class="boat" d="M118 59h59l18 14-18 14h-59l-12-14Z" />
+                <path class="boat" d="M128 163h50l17 14-17 14h-50l-13-14Z" />
+                <path class="boat" d="M110 267h68l17 14-17 14h-68l-13-14Z" />
+                <path class="boat" d="M124 371h54l17 14-17 14h-54l-13-14Z" />
+                <path class="boat" d="M105 475h73l17 14-17 14h-73l-13-14Z" />
+                <path class="boat" d="M128 579h50l17 14-17 14h-50l-13-14Z" />
+              </g>
+            </svg>
+
+            <svg class="connector-lines" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+              <g>
+                <path d="M688 288H908" />
+                <path d="M688 405H908" />
+                <path d="M688 522H908" />
+                <path d="M688 639H908" />
+                <circle cx="688" cy="288" r="5" />
+                <circle cx="908" cy="288" r="5" />
+                <circle cx="688" cy="405" r="5" />
+                <circle cx="908" cy="405" r="5" />
+                <circle cx="688" cy="522" r="5" />
+                <circle cx="908" cy="522" r="5" />
+                <circle cx="688" cy="639" r="5" />
+                <circle cx="908" cy="639" r="5" />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="settings-title">
+        <div class="shell settings-layout">
+          <div class="section-copy settings-copy">
+            <h2 id="settings-title">Your harbor,<br />your rules.</h2>
+            <p>
+              Choose what appears, how often Marina refreshes, and how much process
+              and Docker detail you want to see.
+            </p>
+          </div>
+
+          <figure class="settings-shot">
+            <img
+              src="/marina-settings.png"
+              width="632"
+              height="700"
+              loading="lazy"
+              alt="Marina Settings with controls for launch at login, refresh interval, visible services, process details, and Docker details"
+            />
+          </figure>
+
+          <dl class="settings-list">
+            <div>
+              <dt>Launch at Login</dt>
+              <dd>Open Marina automatically when you sign in.</dd>
+            </div>
+            <div>
+              <dt>Refresh Interval</dt>
+              <dd>Control how often Marina updates the harbor.</dd>
+            </div>
+            <div>
+              <dt>Visible Services</dt>
+              <dd>Decide which listeners and process details appear.</dd>
+            </div>
+            <div>
+              <dt>Docker Details</dt>
+              <dd>Show container name, image, and port mapping information.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="trust-section" aria-labelledby="trust-title">
+        <div class="shell trust-layout">
+          <div class="section-copy trust-copy">
+            <h2 id="trust-title">Clear when it works.<br />Clear when it doesn’t.</h2>
+            <p>
+              Docker problems stay visible without hiding ordinary listeners.
+              Risky actions are confirmed before they run.
+            </p>
+          </div>
+
+          <figure class="light-shot">
+            <img
+              src="/marina-panel-light.png"
+              width="840"
+              height="1300"
+              loading="lazy"
+              alt="Marina in light mode showing listening services and their local ports"
+            />
+          </figure>
+
+          <ul class="trust-list">
+            <li>
+              <span class="trust-icon lock" aria-hidden="true"></span>
+              <div><strong>No sudo</strong><span>Runs with your existing user access.</span></div>
+            </li>
+            <li>
+              <span class="trust-icon warning" aria-hidden="true">!</span>
+              <div><strong>Visible errors</strong><span>Failures stay specific and actionable.</span></div>
+            </li>
+            <li>
+              <span class="trust-icon check" aria-hidden="true">✓</span>
+              <div><strong>Verified actions</strong><span>Targets are rechecked before control.</span></div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="final-cta" aria-labelledby="cta-title">
+        <div class="final-water" aria-hidden="true"></div>
+        <div class="shell final-content">
+          <img src="/app-icon.png" width="72" height="72" alt="" />
+          <h2 id="cta-title">Bring every local<br />service into view.</h2>
+          <a
+            class="button button-primary"
+            href="https://github.com/keishingu/Marina/releases/latest/download/Marina-macos-universal.zip"
+          >
+            Download for macOS
+          </a>
+          <p>Signed &amp; notarized · macOS 14 or later · Apple Silicon &amp; Intel</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell footer-content">
+        <span>© 2026 Marina</span>
+        <div>
+          <a href="https://github.com/keishingu/Marina">Source</a>
+          <a href="https://github.com/keishingu/Marina/releases/latest">Releases</a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
