@@ -107,7 +107,7 @@ struct PortListView: View {
 
             Menu {
                 Button {
-                    openSettings()
+                    showSettings()
                 } label: {
                     Label("Settings…", systemImage: "gearshape")
                 }
@@ -289,6 +289,14 @@ struct PortListView: View {
             await Task.yield()
             guard selectedPort == nil else { return }
             searchIsFocused = true
+        }
+    }
+
+    private func showSettings() {
+        NSApplication.shared.activate()
+        openSettings()
+        DispatchQueue.main.async {
+            NSApplication.shared.activate()
         }
     }
 
