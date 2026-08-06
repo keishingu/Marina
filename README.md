@@ -1,4 +1,8 @@
-# Marina
+<p align="center">
+  <img src="Marina/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" width="160" alt="Marina app icon">
+</p>
+
+<h1 align="center">Marina</h1>
 
 Marina is a native macOS menu bar utility that shows local TCP listeners, their owning processes, inferred service types, and Docker/Compose port mappings in one compact panel.
 
@@ -11,6 +15,14 @@ The screenshot is rendered from the production SwiftUI view with deterministic f
 - macOS 14 Sonoma or later
 - Xcode 15 or later (verified with Xcode 26.3)
 - Docker CLI and a running Docker daemon for container enrichment; normal port scanning works without Docker
+
+## Download
+
+Download the latest `Marina-macos-universal.zip` from [GitHub Releases](https://github.com/keishingu/Marina/releases/latest), extract it, and move `Marina.app` to the Applications folder. The Universal build supports both Apple Silicon and Intel Macs and includes the Marina app icon.
+
+The current downloadable build is ad-hoc signed but is not yet notarized with Apple. On first launch, macOS may block it. After attempting to open Marina, open System Settings > Privacy & Security and choose **Open Anyway** only if you trust this repository and release.
+
+Each push to `main` (including a merged pull request) builds the Release configuration and publishes a versioned GitHub Release automatically. A checksum is provided alongside the ZIP as `Marina-macos-universal.zip.sha256`.
 
 ## Build and test
 
