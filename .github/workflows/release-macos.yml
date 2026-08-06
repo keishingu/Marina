@@ -88,15 +88,25 @@ jobs:
           fi
 
           existing_assets="$(gh release view "${RELEASE_TAG}" --json assets --jq '.assets[].name')"
+          if [[ "${release_state}" == "draft" ]]; then
+            for asset_path in "${asset_paths[@]}"; do
+              asset_name="$(basename "${asset_path}")"
+              if grep -Fxq "${asset_name}" <<< "${existing_assets}"; then
+                gh release delete-asset "${RELEASE_TAG}" "${asset_name}" --yes
+              fi
+            done
+
+            gh release upload "${RELEASE_TAG}" "${asset_paths[@]}"
+            gh release edit "${RELEASE_TAG}" --draft=false
+            exit 0
+          fi
+
           for asset_path in "${asset_paths[@]}"; do
             asset_name="$(basename "${asset_path}")"
-            if grep -Fxq "${asset_name}" <<< "${existing_assets}"; then
-              echo "Asset already exists: ${asset_name}"
-            else
-              gh release upload "${RELEASE_TAG}" "${asset_path}"
+            if ! grep -Fxq "${asset_name}" <<< "${existing_assets}"; then
+              echo "error: 公開済みReleaseにassetが不足しています: ${asset_name}" >&2
+              exit 1
             fi
           done
 
-          if [[ "${release_state}" == "draft" ]]; then
-            gh release edit "${RELEASE_TAG}" --draft=false
-          fi
+          echo "Release assets already exist: ${RELEASE_TAG}"
