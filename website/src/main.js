@@ -1,6 +1,8 @@
 import * as THREE from "three";
+import { Water } from "three/addons/objects/Water.js";
 import "./style.css";
 import { FINGER_PIERS, MAIN_DOCK } from "./harbor-layout.js";
+import { createWaterNormalTexture } from "./water-normal.js";
 
 const canvas = document.querySelector("#harbor-canvas");
 const hero = document.querySelector(".hero");
@@ -39,8 +41,17 @@ function initializeHarbor(targetCanvas, heroElement) {
   const cameraTarget = new THREE.Vector3(1.8, 0, 0);
   camera.lookAt(cameraTarget);
 
-  const seaMaterial = createSeaMaterial();
-  const sea = new THREE.Mesh(new THREE.PlaneGeometry(36, 28, 96, 72), seaMaterial);
+  const reflectionSize = window.matchMedia("(pointer: coarse)").matches ? 256 : 512;
+  const sea = new Water(new THREE.PlaneGeometry(36, 28), {
+    textureWidth: reflectionSize,
+    textureHeight: reflectionSize,
+    waterNormals: createWaterNormalTexture(),
+    sunDirection: new THREE.Vector3(-8, 16, 10).normalize(),
+    sunColor: 0xb9dcff,
+    waterColor: 0x031827,
+    distortionScale: 3.05,
+    fog: true,
+  });
   sea.rotation.x = -Math.PI / 2;
   sea.position.y = -0.14;
   scene.add(sea);
@@ -102,7 +113,7 @@ function initializeHarbor(targetCanvas, heroElement) {
     elapsed += delta;
 
     if (!reducedMotion.matches) {
-      seaMaterial.uniforms.uTime.value = elapsed;
+      sea.material.uniforms.time.value = elapsed * 0.72;
       containerShip.position.y = 0.34 + Math.sin(elapsed * 0.62) * 0.018;
       containerShip.rotation.z = Math.sin(elapsed * 0.48) * 0.0028;
       const targetX = 13.4 + pointer.x * 0.42;
@@ -166,55 +177,6 @@ function initializeHarbor(targetCanvas, heroElement) {
   reducedMotion.addEventListener("change", requestRenderLoop);
   resize();
   requestRenderLoop();
-}
-
-function createSeaMaterial() {
-  return new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: { value: 0 },
-      uDeep: { value: new THREE.Color(0x020811) },
-      uSurface: { value: new THREE.Color(0x0a3651) },
-      uSignal: { value: new THREE.Color(0x168cff) },
-    },
-    vertexShader: `
-      uniform float uTime;
-      varying float vWave;
-      varying vec3 vWorldPosition;
-
-      void main() {
-        vec3 displaced = position;
-        float broad = sin(position.x * 0.48 + uTime * 0.42) * 0.11;
-        float cross = sin(position.y * 0.74 - uTime * 0.36) * 0.07;
-        float detail = sin((position.x + position.y) * 1.7 + uTime * 0.7) * 0.025;
-        displaced.z += broad + cross + detail;
-        vWave = displaced.z;
-        vec4 world = modelMatrix * vec4(displaced, 1.0);
-        vWorldPosition = world.xyz;
-        gl_Position = projectionMatrix * viewMatrix * world;
-      }
-    `,
-    fragmentShader: `
-      uniform float uTime;
-      uniform vec3 uDeep;
-      uniform vec3 uSurface;
-      uniform vec3 uSignal;
-      varying float vWave;
-      varying vec3 vWorldPosition;
-
-      void main() {
-        float wave = smoothstep(-0.14, 0.18, vWave);
-        float distanceFade = smoothstep(20.0, 3.0, length(vWorldPosition.xz));
-        float rippleA = sin(vWorldPosition.x * 3.1 + vWorldPosition.z * 1.7 + uTime * 0.32);
-        float rippleB = sin(vWorldPosition.x * -1.4 + vWorldPosition.z * 4.2 - uTime * 0.24);
-        float ripples = (rippleA + rippleB) * 0.5 + 1.0;
-        float glint = pow(max(0.0, wave), 6.0) * distanceFade * (0.35 + ripples * 0.18);
-        vec3 color = mix(uDeep, uSurface, wave * 0.7 + 0.15);
-        color += uSurface * ripples * 0.025;
-        color += uSignal * glint * 0.32;
-        gl_FragColor = vec4(color, 1.0);
-      }
-    `,
-  });
 }
 
 function addDock(scene, position, size, material, edgeMaterial) {
