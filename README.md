@@ -1,4 +1,8 @@
-# Marina
+<p align="center">
+  <img src="Marina/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" width="160" alt="Marina app icon">
+</p>
+
+<h1 align="center">Marina</h1>
 
 Marina is a native macOS menu bar utility that shows local TCP listeners, their owning processes, inferred service types, and Docker/Compose port mappings in one compact panel.
 
