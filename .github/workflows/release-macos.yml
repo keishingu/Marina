@@ -1,0 +1,78 @@
+name: Release macOS app
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish
+    if: github.ref == 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          xcodebuild \
+            -project Marina.xcodeproj \
+            -scheme Marina \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/test \
+            test
+
+      - name: Build Universal macOS app
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./scripts/build-macos-release.sh
+
+      - name: Read release metadata
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          info_plist="build/release/DerivedData/Build/Products/Release/Marina.app/Contents/Info.plist"
+          version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${info_plist}")"
+
+          if [[ -z "${version}" ]]; then
+            echo "error: アプリのバージョンを取得できません" >&2
+            exit 1
+          fi
+
+          echo "tag=v${version}.${GITHUB_RUN_NUMBER}" >> "${GITHUB_OUTPUT}"
+          echo "title=Marina v${version}.${GITHUB_RUN_NUMBER}" >> "${GITHUB_OUTPUT}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_TITLE: ${{ steps.release.outputs.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release create "${RELEASE_TAG}" \
+              --target "${GITHUB_SHA}" \
+              --title "${RELEASE_TITLE}" \
+              --generate-notes
+          fi
+
+          gh release upload "${RELEASE_TAG}" \
+            build/release/Marina-macos-universal.zip \
+            build/release/Marina-macos-universal.zip.sha256 \
+            --clobber
