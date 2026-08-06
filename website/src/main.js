@@ -3,6 +3,7 @@ import { Water } from "three/addons/objects/Water.js";
 import "./style.css";
 import { FINGER_PIERS, MAIN_DOCK } from "./harbor-layout.js";
 import { createWaterNormalTexture } from "./water-normal.js";
+import { enhanceOfficialWater, sampleHarborWaveHeight } from "./water-surface.js";
 
 const canvas = document.querySelector("#harbor-canvas");
 const hero = document.querySelector(".hero");
@@ -42,7 +43,7 @@ function initializeHarbor(targetCanvas, heroElement) {
   camera.lookAt(cameraTarget);
 
   const reflectionSize = window.matchMedia("(pointer: coarse)").matches ? 256 : 512;
-  const sea = new Water(new THREE.PlaneGeometry(36, 28), {
+  const sea = new Water(new THREE.PlaneGeometry(36, 28, 96, 72), {
     textureWidth: reflectionSize,
     textureHeight: reflectionSize,
     waterNormals: createWaterNormalTexture(),
@@ -52,6 +53,7 @@ function initializeHarbor(targetCanvas, heroElement) {
     distortionScale: 3.05,
     fog: true,
   });
+  enhanceOfficialWater(sea.material);
   sea.rotation.x = -Math.PI / 2;
   sea.position.y = -0.14;
   scene.add(sea);
@@ -114,8 +116,14 @@ function initializeHarbor(targetCanvas, heroElement) {
 
     if (!reducedMotion.matches) {
       sea.material.uniforms.time.value = elapsed * 0.72;
-      containerShip.position.y = 0.34 + Math.sin(elapsed * 0.62) * 0.018;
-      containerShip.rotation.z = Math.sin(elapsed * 0.48) * 0.0028;
+      sea.material.uniforms.uHarborWaveTime.value = elapsed;
+      const shipX = containerShip.position.x;
+      const shipZ = containerShip.position.z;
+      const shipWave = sampleHarborWaveHeight(shipX, shipZ, elapsed);
+      const portWave = sampleHarborWaveHeight(shipX - 1, shipZ, elapsed);
+      const starboardWave = sampleHarborWaveHeight(shipX + 1, shipZ, elapsed);
+      containerShip.position.y = 0.34 + shipWave * 0.48;
+      containerShip.rotation.z = (starboardWave - portWave) * 0.085;
       const targetX = 13.4 + pointer.x * 0.42;
       const targetZ = 15.2 - pointer.y * 0.28;
       camera.position.x += (targetX - camera.position.x) * 0.025;
