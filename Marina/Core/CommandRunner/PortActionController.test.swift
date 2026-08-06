@@ -103,6 +103,20 @@ final class PortActionControllerTests: XCTestCase {
         try await controller.terminate(process)
     }
 
+    func test_SIGKILL後も残る場合はActivityMonitorでの確認を案内する() {
+        let error = PortActionError.processStillRunning(
+            name: "Electron",
+            pid: 30_533,
+            signal: "SIGKILL"
+        )
+
+        XCTAssertEqual(
+            error.errorDescription,
+            "Electron (PID 30533) is still present after SIGKILL. Check its state in Activity Monitor."
+        )
+        XCTAssertFalse(error.errorDescription?.contains("Force Quit") == true)
+    }
+
     private var process: ProcessIdentity {
         ProcessIdentity(
             pid: 30_533,

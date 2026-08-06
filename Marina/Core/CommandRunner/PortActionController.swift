@@ -14,7 +14,9 @@ enum PortActionError: LocalizedError, Equatable, Sendable {
         case .processChanged: "The PID now belongs to a different process. Nothing was terminated."
         case .processUnavailable: "The process is no longer running."
         case .processStillRunning(let name, let pid, let signal):
-            "\(name) (PID \(pid)) is still running after \(signal). Use “Force Quit Process…” if it does not exit."
+            signal == "SIGTERM"
+                ? "\(name) (PID \(pid)) is still running after \(signal). Use “Force Quit Process…” if it does not exit."
+                : "\(name) (PID \(pid)) is still present after \(signal). Check its state in Activity Monitor."
         case .terminationVerificationFailed(let message):
             "Could not verify whether the process terminated: \(message)"
         case .dockerUnavailable: "Docker CLI is not available."
