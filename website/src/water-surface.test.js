@@ -29,7 +29,7 @@ describe("港の水面表現", () => {
     );
   });
 
-  test("公式Waterへ立体波と月光のシェーダーを追加する", () => {
+  test("公式Waterへ立体波と日光のシェーダーを追加する", () => {
     const material = enhanceOfficialWater(createOfficialWaterMaterial());
 
     expect(material.uniforms.uHarborWaveTime.value).toBe(0);

@@ -31,11 +31,11 @@ function initializeHarbor(targetCanvas, heroElement) {
 
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
+  renderer.toneMappingExposure = 1.06;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x06101b);
-  scene.fog = new THREE.FogExp2(0x07121e, 0.036);
+  scene.background = new THREE.Color(0x48bfea);
+  scene.fog = new THREE.FogExp2(0x6bc9e8, 0.012);
 
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
   camera.position.set(13.4, 15.8, 15.2);
@@ -48,9 +48,9 @@ function initializeHarbor(targetCanvas, heroElement) {
     textureHeight: reflectionSize,
     waterNormals: createWaterNormalTexture(),
     sunDirection: new THREE.Vector3(-8, 16, 10).normalize(),
-    sunColor: 0xb9dcff,
-    waterColor: 0x031827,
-    distortionScale: 3.05,
+    sunColor: 0xffffff,
+    waterColor: 0x006fc4,
+    distortionScale: 2.55,
     fog: true,
   });
   enhanceOfficialWater(sea.material);
@@ -58,22 +58,22 @@ function initializeHarbor(targetCanvas, heroElement) {
   sea.position.y = -0.14;
   scene.add(sea);
 
-  const ambient = new THREE.HemisphereLight(0x8fc9ff, 0x02060b, 1.4);
+  const ambient = new THREE.HemisphereLight(0xe6f9ff, 0x075c84, 1.55);
   scene.add(ambient);
 
-  const moon = new THREE.DirectionalLight(0xc6e1ff, 2.4);
-  moon.position.set(-8, 16, 10);
-  scene.add(moon);
+  const sun = new THREE.DirectionalLight(0xfff8df, 3.25);
+  sun.position.set(-8, 16, 10);
+  scene.add(sun);
 
   const dockMaterial = new THREE.MeshStandardMaterial({
-    color: 0x44515d,
-    roughness: 0.58,
-    metalness: 0.25,
+    color: 0xb8c7ca,
+    roughness: 0.72,
+    metalness: 0.08,
   });
   const edgeMaterial = new THREE.MeshStandardMaterial({
-    color: 0x17232e,
-    roughness: 0.75,
-    metalness: 0.08,
+    color: 0x617885,
+    roughness: 0.78,
+    metalness: 0.04,
   });
 
   addDock(scene, MAIN_DOCK.position, MAIN_DOCK.size, dockMaterial, edgeMaterial);
@@ -203,19 +203,19 @@ function addDock(scene, position, size, material, edgeMaterial) {
 function addBoat(scene, [x, y, z], port) {
   const group = new THREE.Group();
   const hullMaterial = new THREE.MeshStandardMaterial({
-    color: 0x142c3f,
-    roughness: 0.38,
-    metalness: 0.32,
+    color: 0xf5fbff,
+    roughness: 0.4,
+    metalness: 0.12,
   });
   const cabinMaterial = new THREE.MeshStandardMaterial({
-    color: 0xb8c7d2,
-    roughness: 0.52,
-    metalness: 0.08,
+    color: 0xffffff,
+    roughness: 0.48,
+    metalness: 0.04,
   });
   const windowMaterial = new THREE.MeshStandardMaterial({
-    color: 0x7dc7ff,
-    emissive: 0x0d5c9c,
-    emissiveIntensity: 1.8,
+    color: 0x176c99,
+    roughness: 0.24,
+    metalness: 0.22,
   });
 
   const hull = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.28, 0.62), hullMaterial);
@@ -250,17 +250,17 @@ function createPortLabel(text) {
   labelCanvas.height = 112;
   const context = labelCanvas.getContext("2d");
   context.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
-  context.fillStyle = "rgba(3, 11, 19, 0.86)";
+  context.fillStyle = "rgba(247, 252, 255, 0.94)";
   context.beginPath();
   context.roundRect(42, 14, 236, 84, 24);
   context.fill();
-  context.strokeStyle = "rgba(88, 172, 255, 0.55)";
+  context.strokeStyle = "rgba(12, 111, 173, 0.62)";
   context.lineWidth = 3;
   context.stroke();
   context.font = "600 48px ui-monospace, SFMono-Regular, Menlo, monospace";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "#eef7ff";
+  context.fillStyle = "#0b4f78";
   context.fillText(text, 160, 57);
 
   const texture = new THREE.CanvasTexture(labelCanvas);
@@ -273,14 +273,14 @@ function createPortLabel(text) {
 
 function addTerminal(scene) {
   const buildingMaterial = new THREE.MeshStandardMaterial({
-    color: 0x273747,
-    roughness: 0.4,
-    metalness: 0.28,
+    color: 0xeaf2f4,
+    roughness: 0.5,
+    metalness: 0.1,
   });
   const lightMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffddb0,
-    emissive: 0xffa94d,
-    emissiveIntensity: 2,
+    color: 0x3da6c7,
+    roughness: 0.28,
+    metalness: 0.18,
   });
 
   const base = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.5, 1.7), buildingMaterial);
@@ -301,17 +301,19 @@ function addTerminal(scene) {
 function addContainerShip(scene) {
   const ship = new THREE.Group();
   const hullMaterial = new THREE.MeshStandardMaterial({
-    color: 0x0b3d68,
+    color: 0x105b8e,
     roughness: 0.35,
-    metalness: 0.42,
+    metalness: 0.32,
   });
-  const containerMaterial = new THREE.MeshStandardMaterial({
-    color: 0x197bbf,
-    roughness: 0.52,
-    metalness: 0.18,
-  });
+  const containerMaterials = [0x1689cc, 0x27a3d7, 0x0d6fa8].map(
+    (color) => new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.52,
+      metalness: 0.18,
+    }),
+  );
   const bridgeMaterial = new THREE.MeshStandardMaterial({
-    color: 0xbccbd5,
+    color: 0xf1f7f8,
     roughness: 0.55,
   });
 
@@ -320,14 +322,17 @@ function addContainerShip(scene) {
 
   const deck = new THREE.Mesh(
     new THREE.BoxGeometry(2.04, 0.12, 8.42),
-    new THREE.MeshStandardMaterial({ color: 0x8196a6, roughness: 0.68, metalness: 0.12 }),
+    new THREE.MeshStandardMaterial({ color: 0xa7b7bc, roughness: 0.68, metalness: 0.12 }),
   );
   deck.position.y = 0.34;
   ship.add(deck);
 
   for (let row = 0; row < 5; row += 1) {
     for (let column = 0; column < 3; column += 1) {
-      const container = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.36, 1.15), containerMaterial);
+      const container = new THREE.Mesh(
+        new THREE.BoxGeometry(0.56, 0.36, 1.15),
+        containerMaterials[(row + column) % containerMaterials.length],
+      );
       container.position.set((column - 1) * 0.62, 0.48, -1.8 + row * 1.23);
       ship.add(container);
     }
@@ -347,18 +352,16 @@ function addContainerShip(scene) {
     new THREE.BoxGeometry(1.54, 0.18, 1.06),
     new THREE.MeshStandardMaterial({
       color: 0x9fd5ff,
-      emissive: 0x276b9b,
-      emissiveIntensity: 1.5,
       roughness: 0.3,
+      metalness: 0.18,
     }),
   );
   bridgeWindows.position.set(0, 0.76, -3.55);
   ship.add(bridgeWindows);
 
   const navigationLightMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffdeb0,
-    emissive: 0xffa43d,
-    emissiveIntensity: 2.8,
+    color: 0xfff4d8,
+    roughness: 0.38,
   });
   const navigationLightGeometry = new THREE.SphereGeometry(0.045, 8, 8);
   for (let z = -3.8; z <= 4.1; z += 1.12) {
@@ -376,9 +379,9 @@ function addContainerShip(scene) {
 
 function addDockLights(scene) {
   const material = new THREE.MeshStandardMaterial({
-    color: 0xffe2b4,
-    emissive: 0xffa33a,
-    emissiveIntensity: 3.2,
+    color: 0xf2f7f7,
+    roughness: 0.48,
+    metalness: 0.16,
   });
   const geometry = new THREE.SphereGeometry(0.055, 8, 8);
 

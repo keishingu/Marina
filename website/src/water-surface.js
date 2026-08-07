@@ -31,7 +31,7 @@ export function enhanceOfficialWater(material) {
   }
 
   material.uniforms.uHarborWaveTime = { value: 0 };
-  material.uniforms.uHarborGlintColor = { value: new Color(0x9fd7ff) };
+  material.uniforms.uHarborGlintColor = { value: new Color(0xeafaff) };
 
   material.vertexShader = material.vertexShader
     .replace(
@@ -72,13 +72,13 @@ export function enhanceOfficialWater(material) {
     )
     .replace(
       FRAGMENT_ANCHOR,
-      `float moonPath = abs(worldPosition.x - worldPosition.z * 0.18 - 8.6);
-          float moonBand = exp(-moonPath * moonPath * 0.13);
+      `float sunPath = abs(worldPosition.x - worldPosition.z * 0.18 - 8.6);
+          float sunBand = exp(-sunPath * sunPath * 0.1);
           float crest = smoothstep(0.028, 0.098, vHarborWaveHeight);
           float shimmerA = sin(worldPosition.x * 7.4 - worldPosition.z * 4.8 + uHarborWaveTime * 1.35) * 0.5 + 0.5;
           float shimmerB = sin(worldPosition.x * 13.2 + worldPosition.z * 8.7 - uHarborWaveTime * 0.82) * 0.5 + 0.5;
           float shimmer = pow(shimmerA * shimmerB, 1.35);
-          vec3 harborGlint = uHarborGlintColor * moonBand * crest * (0.018 + shimmer * 0.052);
+          vec3 harborGlint = uHarborGlintColor * sunBand * crest * (0.028 + shimmer * 0.078);
           vec3 outgoingLight = albedo + harborGlint;`,
     );
 
