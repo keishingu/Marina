@@ -42,6 +42,7 @@ struct PortListView: View {
 
     @ViewBuilder
     private var portList: some View {
+#if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             GlassEffectContainer(spacing: 12) {
                 portListContent
@@ -49,6 +50,9 @@ struct PortListView: View {
         } else {
             portListContent
         }
+#else
+        portListContent
+#endif
     }
 
     private var portListContent: some View {
@@ -112,6 +116,7 @@ struct PortListView: View {
 
     @ViewBuilder
     private var headerActions: some View {
+#if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             HStack(spacing: 6) {
                 refreshButton
@@ -125,6 +130,12 @@ struct PortListView: View {
                 marinaMenu.menuStyle(.borderlessButton)
             }
         }
+#else
+        HStack(spacing: 10) {
+            refreshButton.buttonStyle(.plain)
+            marinaMenu.menuStyle(.borderlessButton)
+        }
+#endif
     }
 
     private var refreshButton: some View {
@@ -169,6 +180,7 @@ struct PortListView: View {
 
     @ViewBuilder
     private var searchField: some View {
+#if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             searchFieldContent
                 .glassEffect(
@@ -183,6 +195,12 @@ struct PortListView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 10)
         }
+#else
+        searchFieldContent
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .padding(.horizontal, 14)
+            .padding(.bottom, 10)
+#endif
     }
 
     private var searchFieldContent: some View {
