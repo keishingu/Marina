@@ -40,7 +40,18 @@ struct PortListView: View {
         }
     }
 
+    @ViewBuilder
     private var portList: some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: 12) {
+                portListContent
+            }
+        } else {
+            portListContent
+        }
+    }
+
+    private var portListContent: some View {
         VStack(spacing: 0) {
             header
             searchField
@@ -93,49 +104,88 @@ struct PortListView: View {
                     .contentTransition(.numericText())
             }
             Spacer()
-            Button {
-                Task { await viewModel.refresh() }
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .frame(width: 24, height: 24)
-            }
-            .buttonStyle(.plain)
-            .disabled(viewModel.isRefreshing)
-            .keyboardShortcut("r", modifiers: .command)
-            .help("Refresh ports (⌘R)")
-            .accessibilityLabel(viewModel.isRefreshing ? "Refreshing ports" : "Refresh ports")
-
-            Menu {
-                Button {
-                    showSettings()
-                } label: {
-                    Label("Settings…", systemImage: "gearshape")
-                }
-                .keyboardShortcut(",", modifiers: .command)
-
-                Divider()
-
-                Button(role: .destructive) {
-                    NSApplication.shared.terminate(nil)
-                } label: {
-                    Label("Quit Marina", systemImage: "power")
-                }
-                .keyboardShortcut("q", modifiers: .command)
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .frame(width: 24, height: 24)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("Marina menu")
-            .accessibilityLabel("Marina menu")
+            headerActions
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
     }
 
+    @ViewBuilder
+    private var headerActions: some View {
+        if #available(macOS 26.0, *) {
+            HStack(spacing: 6) {
+                refreshButton
+                marinaMenu.menuStyle(.button)
+            }
+            .buttonStyle(.glass)
+            .controlSize(.small)
+        } else {
+            HStack(spacing: 10) {
+                refreshButton.buttonStyle(.plain)
+                marinaMenu.menuStyle(.borderlessButton)
+            }
+        }
+    }
+
+    private var refreshButton: some View {
+        Button {
+            Task { await viewModel.refresh() }
+        } label: {
+            Image(systemName: "arrow.clockwise")
+                .frame(width: 24, height: 24)
+        }
+        .disabled(viewModel.isRefreshing)
+        .keyboardShortcut("r", modifiers: .command)
+        .help("Refresh ports (⌘R)")
+        .accessibilityLabel(viewModel.isRefreshing ? "Refreshing ports" : "Refresh ports")
+    }
+
+    private var marinaMenu: some View {
+        Menu {
+            Button {
+                showSettings()
+            } label: {
+                Label("Settings…", systemImage: "gearshape")
+            }
+            .keyboardShortcut(",", modifiers: .command)
+
+            Divider()
+
+            Button(role: .destructive) {
+                NSApplication.shared.terminate(nil)
+            } label: {
+                Label("Quit Marina", systemImage: "power")
+            }
+            .keyboardShortcut("q", modifiers: .command)
+        } label: {
+            Image(systemName: "ellipsis")
+                .frame(width: 24, height: 24)
+        }
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Marina menu")
+        .accessibilityLabel("Marina menu")
+    }
+
+    @ViewBuilder
     private var searchField: some View {
+        if #available(macOS 26.0, *) {
+            searchFieldContent
+                .glassEffect(
+                    .regular,
+                    in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+                )
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
+        } else {
+            searchFieldContent
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
+        }
+    }
+
+    private var searchFieldContent: some View {
         HStack(spacing: 7) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
@@ -160,9 +210,6 @@ struct PortListView: View {
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 7)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-        .padding(.horizontal, 14)
-        .padding(.bottom, 10)
     }
 
     private var portCountSummary: String {
