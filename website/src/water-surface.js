@@ -1,4 +1,4 @@
-import { Color } from "three";
+import { Color, Vector2 } from "three";
 
 const HARBOR_WAVES = Object.freeze([
   Object.freeze({ direction: [0.89, 0.45], frequency: 0.58, amplitude: 0.064, speed: 0.32 }),
@@ -32,6 +32,8 @@ export function enhanceOfficialWater(material) {
 
   material.uniforms.uHarborWaveTime = { value: 0 };
   material.uniforms.uHarborGlintColor = { value: new Color(0xeafaff) };
+  material.uniforms.uHarborGlintFalloff = { value: 0.1 };
+  material.uniforms.uHarborGlintStrength = { value: new Vector2(0.028, 0.078) };
 
   material.vertexShader = material.vertexShader
     .replace(
@@ -63,6 +65,8 @@ export function enhanceOfficialWater(material) {
       "uniform vec3 waterColor;",
       `uniform vec3 waterColor;
         uniform vec3 uHarborGlintColor;
+        uniform float uHarborGlintFalloff;
+        uniform vec2 uHarborGlintStrength;
         uniform float uHarborWaveTime;`,
     )
     .replace(
@@ -72,13 +76,13 @@ export function enhanceOfficialWater(material) {
     )
     .replace(
       FRAGMENT_ANCHOR,
-      `float sunPath = abs(worldPosition.x - worldPosition.z * 0.18 - 8.6);
-          float sunBand = exp(-sunPath * sunPath * 0.1);
+      `float glintPath = abs(worldPosition.x - worldPosition.z * 0.18 - 8.6);
+          float glintBand = exp(-glintPath * glintPath * uHarborGlintFalloff);
           float crest = smoothstep(0.028, 0.098, vHarborWaveHeight);
           float shimmerA = sin(worldPosition.x * 7.4 - worldPosition.z * 4.8 + uHarborWaveTime * 1.35) * 0.5 + 0.5;
           float shimmerB = sin(worldPosition.x * 13.2 + worldPosition.z * 8.7 - uHarborWaveTime * 0.82) * 0.5 + 0.5;
           float shimmer = pow(shimmerA * shimmerB, 1.35);
-          vec3 harborGlint = uHarborGlintColor * sunBand * crest * (0.028 + shimmer * 0.078);
+          vec3 harborGlint = uHarborGlintColor * glintBand * crest * (uHarborGlintStrength.x + shimmer * uHarborGlintStrength.y);
           vec3 outgoingLight = albedo + harborGlint;`,
     );
 

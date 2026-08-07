@@ -29,10 +29,12 @@ describe("港の水面表現", () => {
     );
   });
 
-  test("公式Waterへ立体波と日光のシェーダーを追加する", () => {
+  test("公式Waterへ立体波とテーマ対応の反射を追加する", () => {
     const material = enhanceOfficialWater(createOfficialWaterMaterial());
 
     expect(material.uniforms.uHarborWaveTime.value).toBe(0);
+    expect(material.uniforms.uHarborGlintFalloff.value).toBe(0.1);
+    expect(material.uniforms.uHarborGlintStrength.value.toArray()).toEqual([0.028, 0.078]);
     expect(material.vertexShader).toContain("displacedPosition");
     expect(material.fragmentShader).toContain("harborGlint");
   });

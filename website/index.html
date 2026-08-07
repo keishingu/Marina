@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#dff7ff" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#dff7ff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07111d" />
     <meta
       name="description"
       content="Marina is a native macOS menu bar utility for seeing local TCP ports, owning processes, and Docker Compose mappings in one calm panel."
@@ -101,12 +102,15 @@
             </svg>
 
             <figure class="product-shot">
-              <img
-                src="/marina-panel-light.png"
-                width="840"
-                height="1300"
-                alt="Marina showing local Next.js, Rails, Vite, PostgreSQL, Redis, Python, and Django listeners with their ports and owners"
-              />
+              <picture>
+                <source media="(prefers-color-scheme: dark)" srcset="/marina-panel.png" />
+                <img
+                  src="/marina-panel-light.png"
+                  width="840"
+                  height="1300"
+                  alt="Marina showing local Next.js, Rails, Vite, PostgreSQL, Redis, Python, and Django listeners with their ports and owners"
+                />
+              </picture>
             </figure>
 
             <svg class="blueprint blueprint-berths" viewBox="0 0 260 760" aria-hidden="true">
@@ -153,13 +157,16 @@
           </div>
 
           <figure class="settings-shot">
-            <img
-              src="/marina-settings-light.png"
-              width="1040"
-              height="1176"
-              loading="lazy"
-              alt="Marina Settings with controls for launch at login, refresh interval, visible services, process details, and Docker details"
-            />
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcset="/marina-settings.png" />
+              <img
+                src="/marina-settings-light.png"
+                width="1040"
+                height="1176"
+                loading="lazy"
+                alt="Marina Settings with controls for launch at login, refresh interval, visible services, process details, and Docker details"
+              />
+            </picture>
           </figure>
 
           <dl class="settings-list">
@@ -194,13 +201,16 @@
           </div>
 
           <figure class="light-shot">
-            <img
-              src="/marina-panel.png"
-              width="840"
-              height="1300"
-              loading="lazy"
-              alt="Marina in dark mode showing listening services and their local ports"
-            />
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcset="/marina-panel-light.png" />
+              <img
+                src="/marina-panel.png"
+                width="840"
+                height="1300"
+                loading="lazy"
+                alt="Marina showing listening services and their local ports in the contrasting system appearance"
+              />
+            </picture>
           </figure>
 
           <ul class="trust-list">

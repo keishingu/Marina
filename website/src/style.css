@@ -18,6 +18,53 @@
   --color-blueprint: oklch(48% 0.13 238 / 34%);
   --color-success: oklch(72% 0.18 145);
   --color-warning: oklch(72% 0.19 50);
+  --page-background: var(--color-deep);
+  --header-color: var(--color-ink);
+  --hero-background: var(--color-sky);
+  --hero-fallback:
+    radial-gradient(circle at 79% 9%, oklch(99% 0.03 100), transparent 18rem),
+    linear-gradient(165deg, var(--color-sky) 0 42%, var(--color-ocean) 100%);
+  --hero-vignette:
+    linear-gradient(90deg, oklch(97% 0.03 222 / 97%) 0%, oklch(95% 0.05 222 / 72%) 28%, transparent 57%),
+    linear-gradient(0deg, var(--color-deep) 0%, transparent 22%);
+  --hero-vignette-mobile:
+    linear-gradient(180deg, oklch(96% 0.04 220 / 6%) 0%, oklch(96% 0.04 220 / 54%) 60%, var(--color-deep) 100%);
+  --primary-shadow: 0 4px 8px oklch(34% 0.14 245 / 24%);
+  --primary-shadow-hover: 0 6px 8px oklch(34% 0.14 245 / 30%);
+  --product-background: var(--color-deep);
+  --product-glow: radial-gradient(circle, oklch(78% 0.12 230 / 46%), transparent 66%);
+  --product-shot-border: 1px solid oklch(42% 0.05 245 / 16%);
+  --product-shot-shadow: 0 8px 8px oklch(35% 0.08 245 / 14%);
+  --connector-fill: var(--color-blue);
+  --connector-stroke: oklch(48% 0.14 240 / 64%);
+  --settings-border: 0;
+  --settings-background:
+    radial-gradient(circle at 76% 18%, oklch(81% 0.13 220 / 58%), transparent 28rem),
+    linear-gradient(135deg, oklch(58% 0.2 246), oklch(66% 0.16 224));
+  --settings-color: white;
+  --settings-copy-color: oklch(96% 0.025 220 / 88%);
+  --settings-glow: oklch(92% 0.07 220 / 38%);
+  --settings-image-radius: 0.875rem;
+  --settings-image-shadow: 0 8px 8px oklch(27% 0.1 248 / 22%);
+  --settings-line: oklch(98% 0.01 220 / 30%);
+  --settings-title-color: white;
+  --settings-detail-color: oklch(96% 0.025 220 / 80%);
+  --trust-background: oklch(94% 0.035 222);
+  --trust-shot-background: var(--color-abyss);
+  --final-background: var(--color-ocean);
+  --final-water-background:
+    radial-gradient(ellipse at 50% 100%, oklch(86% 0.11 210 / 48%), transparent 46%),
+    radial-gradient(circle at 78% 10%, oklch(98% 0.04 100 / 76%), transparent 12rem),
+    linear-gradient(180deg, oklch(72% 0.13 220), oklch(50% 0.19 246));
+  --final-line: oklch(99% 0.02 220 / 46%);
+  --final-line-shadow:
+    0 1rem 0 oklch(99% 0.02 220 / 20%),
+    0 2.25rem 0 oklch(99% 0.02 220 / 12%);
+  --final-button-background: white;
+  --final-button-color: var(--color-abyss);
+  --final-button-hover: oklch(97% 0.025 220);
+  --final-detail-color: oklch(98% 0.015 220 / 82%);
+  --footer-color: oklch(88% 0.035 225);
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
@@ -37,14 +84,14 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--color-deep);
+  background: var(--page-background);
 }
 
 body {
   margin: 0;
   min-width: 20rem;
   overflow-x: hidden;
-  background: var(--color-deep);
+  background: var(--page-background);
   color: var(--color-ink);
   font-size: 1rem;
   line-height: 1.6;
@@ -52,6 +99,7 @@ body {
 }
 
 img,
+picture,
 svg,
 canvas {
   display: block;
@@ -115,7 +163,7 @@ a {
   align-items: center;
   justify-content: space-between;
   transform: translateX(-50%);
-  color: var(--color-ink);
+  color: var(--header-color);
 }
 
 .brand {
@@ -180,7 +228,7 @@ footer a:hover::after {
   overflow: hidden;
   align-items: center;
   isolation: isolate;
-  background: var(--color-sky);
+  background: var(--hero-background);
 }
 
 #harbor-canvas,
@@ -198,17 +246,13 @@ footer a:hover::after {
 
 .hero-fallback {
   z-index: -4;
-  background:
-    radial-gradient(circle at 79% 9%, oklch(99% 0.03 100), transparent 18rem),
-    linear-gradient(165deg, var(--color-sky) 0 42%, var(--color-ocean) 100%);
+  background: var(--hero-fallback);
 }
 
 .hero-vignette {
   z-index: -2;
   pointer-events: none;
-  background:
-    linear-gradient(90deg, oklch(97% 0.03 222 / 97%) 0%, oklch(95% 0.05 222 / 72%) 28%, transparent 57%),
-    linear-gradient(0deg, var(--color-deep) 0%, transparent 22%);
+  background: var(--hero-vignette);
 }
 
 .webgl-unavailable #harbor-canvas {
@@ -280,14 +324,14 @@ footer a:hover::after {
 
 .button-primary {
   background: var(--color-blue);
-  box-shadow: 0 4px 8px oklch(34% 0.14 245 / 24%);
+  box-shadow: var(--primary-shadow);
   color: white;
 }
 
 .button-primary:hover {
   transform: translateY(-2px);
   background: oklch(54% 0.21 250);
-  box-shadow: 0 6px 8px oklch(34% 0.14 245 / 30%);
+  box-shadow: var(--primary-shadow-hover);
 }
 
 .button-primary:active {
@@ -336,7 +380,7 @@ footer a:hover::after {
 .settings-section {
   position: relative;
   overflow: hidden;
-  background: var(--color-deep);
+  background: var(--product-background);
 }
 
 .product-layout,
@@ -382,7 +426,7 @@ footer a:hover::after {
   position: absolute;
   z-index: -2;
   inset: 16% 2% 8%;
-  background: radial-gradient(circle, oklch(78% 0.12 230 / 46%), transparent 66%);
+  background: var(--product-glow);
   content: "";
 }
 
@@ -392,10 +436,10 @@ footer a:hover::after {
   width: min(31rem, 70vw);
   margin: 0;
   overflow: hidden;
-  border: 1px solid oklch(42% 0.05 245 / 16%);
+  border: var(--product-shot-border);
   border-radius: 0.875rem;
   background: var(--color-surface);
-  box-shadow: 0 8px 8px oklch(35% 0.08 245 / 14%);
+  box-shadow: var(--product-shot-shadow);
 }
 
 .blueprint,
@@ -430,23 +474,21 @@ footer a:hover::after {
   inset: 0;
   width: 100%;
   height: 100%;
-  fill: var(--color-blue);
-  stroke: oklch(48% 0.14 240 / 64%);
+  fill: var(--connector-fill);
+  stroke: var(--connector-stroke);
   stroke-width: 1.4;
   stroke-dasharray: 6 8;
   vector-effect: non-scaling-stroke;
 }
 
 .settings-section {
-  border-top: 0;
-  background:
-    radial-gradient(circle at 76% 18%, oklch(81% 0.13 220 / 58%), transparent 28rem),
-    linear-gradient(135deg, oklch(58% 0.2 246), oklch(66% 0.16 224));
-  color: white;
+  border-top: var(--settings-border);
+  background: var(--settings-background);
+  color: var(--settings-color);
 }
 
 .settings-section .section-copy p {
-  color: oklch(96% 0.025 220 / 88%);
+  color: var(--settings-copy-color);
 }
 
 .settings-shot {
@@ -459,7 +501,7 @@ footer a:hover::after {
   position: absolute;
   z-index: -1;
   inset: 8% 10%;
-  background: oklch(92% 0.07 220 / 38%);
+  background: var(--settings-glow);
   border-radius: 50%;
   filter: blur(4rem);
   content: "";
@@ -467,8 +509,8 @@ footer a:hover::after {
 
 .settings-shot img {
   width: 100%;
-  border-radius: 0.875rem;
-  box-shadow: 0 8px 8px oklch(27% 0.1 248 / 22%);
+  border-radius: var(--settings-image-radius);
+  box-shadow: var(--settings-image-shadow);
 }
 
 .settings-list {
@@ -478,28 +520,28 @@ footer a:hover::after {
 
 .settings-list > div {
   padding-block: 1.25rem;
-  border-bottom: 1px solid oklch(98% 0.01 220 / 30%);
+  border-bottom: 1px solid var(--settings-line);
 }
 
 .settings-list > div:first-child {
-  border-top: 1px solid oklch(98% 0.01 220 / 30%);
+  border-top: 1px solid var(--settings-line);
 }
 
 .settings-list dt {
-  color: white;
+  color: var(--settings-title-color);
   font-weight: 680;
 }
 
 .settings-list dd {
   margin: 0.25rem 0 0;
-  color: oklch(96% 0.025 220 / 80%);
+  color: var(--settings-detail-color);
   font-size: 0.9375rem;
   line-height: 1.55;
 }
 
 .trust-section {
   color-scheme: light;
-  background: oklch(94% 0.035 222);
+  background: var(--trust-background);
   color: oklch(22% 0.028 245);
 }
 
@@ -513,7 +555,7 @@ footer a:hover::after {
   overflow: hidden;
   border: 1px solid oklch(36% 0.02 245 / 16%);
   border-radius: 0.75rem;
-  background: var(--color-abyss);
+  background: var(--trust-shot-background);
   box-shadow: 0 6px 8px oklch(22% 0.03 245 / 12%);
 }
 
@@ -588,7 +630,7 @@ footer a:hover::after {
   min-height: 35rem;
   overflow: hidden;
   isolation: isolate;
-  background: var(--color-ocean);
+  background: var(--final-background);
   color: white;
 }
 
@@ -596,10 +638,7 @@ footer a:hover::after {
   position: absolute;
   z-index: -1;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 100%, oklch(86% 0.11 210 / 48%), transparent 46%),
-    radial-gradient(circle at 78% 10%, oklch(98% 0.04 100 / 76%), transparent 12rem),
-    linear-gradient(180deg, oklch(72% 0.13 220), oklch(50% 0.19 246));
+  background: var(--final-water-background);
 }
 
 .final-water::before,
@@ -609,10 +648,8 @@ footer a:hover::after {
   bottom: 18%;
   left: -10%;
   height: 1px;
-  background: oklch(99% 0.02 220 / 46%);
-  box-shadow:
-    0 1rem 0 oklch(99% 0.02 220 / 20%),
-    0 2.25rem 0 oklch(99% 0.02 220 / 12%);
+  background: var(--final-line);
+  box-shadow: var(--final-line-shadow);
   content: "";
 }
 
@@ -647,24 +684,24 @@ footer a:hover::after {
 }
 
 .final-content .button-primary {
-  background: white;
-  color: var(--color-abyss);
+  background: var(--final-button-background);
+  color: var(--final-button-color);
 }
 
 .final-content .button-primary:hover {
-  background: oklch(97% 0.025 220);
+  background: var(--final-button-hover);
 }
 
 .final-content p {
   margin: var(--space-md) 0 0;
-  color: oklch(98% 0.015 220 / 82%);
+  color: var(--final-detail-color);
   font-size: 0.875rem;
 }
 
 footer {
   border-top: 1px solid var(--color-line);
   background: var(--color-abyss);
-  color: oklch(88% 0.035 225);
+  color: var(--footer-color);
   font-size: 0.875rem;
 }
 
@@ -747,8 +784,7 @@ footer {
   }
 
   .hero-vignette {
-    background:
-      linear-gradient(180deg, oklch(96% 0.04 220 / 6%) 0%, oklch(96% 0.04 220 / 54%) 60%, var(--color-deep) 100%);
+    background: var(--hero-vignette-mobile);
   }
 
   .hero-content {
@@ -824,6 +860,66 @@ footer {
   .text-link,
   footer a {
     min-height: 3rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-abyss: oklch(10% 0.025 245);
+    --color-deep: oklch(14% 0.028 245);
+    --color-surface: oklch(19% 0.026 245);
+    --color-surface-raised: oklch(24% 0.024 245);
+    --color-ink: oklch(97% 0.008 245);
+    --color-body: oklch(82% 0.018 245);
+    --color-muted: oklch(67% 0.018 245);
+    --color-blue: oklch(64% 0.2 253);
+    --color-blue-bright: oklch(72% 0.16 248);
+    --color-line: oklch(76% 0.08 245 / 22%);
+    --color-blueprint: oklch(75% 0.08 245 / 28%);
+    --header-color: var(--color-ink);
+    --hero-background: var(--color-abyss);
+    --hero-fallback:
+      radial-gradient(circle at 73% 38%, oklch(35% 0.09 245), transparent 23rem),
+      linear-gradient(165deg, var(--color-abyss), oklch(19% 0.05 245));
+    --hero-vignette:
+      linear-gradient(90deg, oklch(9% 0.02 245 / 96%) 0%, oklch(9% 0.02 245 / 72%) 28%, transparent 64%),
+      linear-gradient(0deg, var(--color-deep) 0%, transparent 24%);
+    --hero-vignette-mobile:
+      linear-gradient(180deg, oklch(9% 0.02 245 / 26%) 0%, oklch(9% 0.02 245 / 91%) 62%, var(--color-deep) 100%);
+    --primary-shadow: 0 4px 8px oklch(5% 0.02 245 / 34%);
+    --primary-shadow-hover: 0 6px 8px oklch(5% 0.02 245 / 42%);
+    --product-background: var(--color-deep);
+    --product-glow: radial-gradient(circle, oklch(30% 0.06 245 / 48%), transparent 66%);
+    --product-shot-border: 1px solid oklch(76% 0.03 245 / 20%);
+    --product-shot-shadow: 0 8px 8px oklch(4% 0.02 245 / 28%);
+    --connector-fill: var(--color-blue-bright);
+    --connector-stroke: oklch(82% 0.08 245 / 68%);
+    --settings-border: 1px solid var(--color-line);
+    --settings-background: oklch(13% 0.029 245);
+    --settings-color: var(--color-ink);
+    --settings-copy-color: var(--color-body);
+    --settings-glow: oklch(36% 0.08 245 / 20%);
+    --settings-image-radius: 0;
+    --settings-image-shadow: none;
+    --settings-line: var(--color-line);
+    --settings-title-color: var(--color-ink);
+    --settings-detail-color: var(--color-muted);
+    --trust-background: oklch(97% 0.006 245);
+    --trust-shot-background: white;
+    --final-background: var(--color-abyss);
+    --final-water-background:
+      radial-gradient(ellipse at 50% 100%, oklch(43% 0.11 245 / 42%), transparent 44%),
+      linear-gradient(180deg, var(--color-abyss), oklch(16% 0.04 245));
+    --final-line: oklch(76% 0.11 245 / 26%);
+    --final-line-shadow:
+      0 1rem 0 oklch(76% 0.11 245 / 12%),
+      0 2.25rem 0 oklch(76% 0.11 245 / 8%);
+    --final-button-background: var(--color-blue);
+    --final-button-color: white;
+    --final-button-hover: oklch(69% 0.19 251);
+    --final-detail-color: var(--color-muted);
+    --footer-color: var(--color-muted);
   }
 }
 
