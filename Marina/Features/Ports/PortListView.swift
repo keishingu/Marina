@@ -120,20 +120,20 @@ struct PortListView: View {
         if #available(macOS 26.0, *) {
             HStack(spacing: 6) {
                 refreshButton
-                marinaMenu.menuStyle(.button)
+                marinaMenu(systemImage: "ellipsis").menuStyle(.button)
             }
             .buttonStyle(.glass)
             .controlSize(.small)
         } else {
             HStack(spacing: 10) {
                 refreshButton.buttonStyle(.plain)
-                marinaMenu.menuStyle(.borderlessButton)
+                marinaMenu(systemImage: "ellipsis.circle").menuStyle(.borderlessButton)
             }
         }
 #else
         HStack(spacing: 10) {
             refreshButton.buttonStyle(.plain)
-            marinaMenu.menuStyle(.borderlessButton)
+            marinaMenu(systemImage: "ellipsis.circle").menuStyle(.borderlessButton)
         }
 #endif
     }
@@ -151,7 +151,7 @@ struct PortListView: View {
         .accessibilityLabel(viewModel.isRefreshing ? "Refreshing ports" : "Refresh ports")
     }
 
-    private var marinaMenu: some View {
+    private func marinaMenu(systemImage: String) -> some View {
         Menu {
             Button {
                 showSettings()
@@ -169,7 +169,7 @@ struct PortListView: View {
             }
             .keyboardShortcut("q", modifiers: .command)
         } label: {
-            Image(systemName: "ellipsis")
+            Image(systemName: systemImage)
                 .frame(width: 24, height: 24)
         }
         .menuIndicator(.hidden)
