@@ -66,7 +66,8 @@ Marina/
 │   ├── Models/             Listener, process, service, container models
 │   ├── PortScanner/        lsof field parser and normalization
 │   ├── ProcessResolver/    ps/lsof process metadata enrichment
-│   └── ServiceResolver/    Conservative service inference
+│   ├── ServiceResolver/    Conservative service inference
+│   └── TunnelResolver/     ngrok/Cloudflare origin matching
 └── DesignSystem/           Service logos, SF Symbol fallbacks, status indicators
 ```
 
@@ -87,6 +88,12 @@ Marina runs `/usr/sbin/lsof` through `Foundation.Process` with explicit argument
 - `/usr/sbin/lsof -a -p <pid> -d cwd -Fn`
 
 IPv4 and IPv6 sockets belonging to the same PID, host port, and protocol are normalized into one listener while retaining all bind addresses and families. Results are sorted by ascending port.
+
+## Tunnel integration
+
+Marina recognizes common `ngrok http <port>` and `cloudflared tunnel --url <local URL>` commands. When the declared origin is an active local listener, the provider appears as a badge and dedicated menu on that origin service. ngrok's Inspector and cloudflared's metrics listeners are then folded into the origin instead of appearing as unrelated ports.
+
+The tunnel menu links to the provider dashboard, copies the running command, and opens the local Traffic Inspector when ngrok exposes one. Named tunnels or missing origin listeners are not guessed; Marina keeps the management listener visible and shows a tunnel-specific warning.
 
 ## Docker integration
 

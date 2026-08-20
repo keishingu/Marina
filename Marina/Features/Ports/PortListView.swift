@@ -11,11 +11,19 @@ struct PortListView: View {
     @FocusState private var searchIsFocused: Bool
 
     var body: some View {
-        Group {
-            if let selectedPort {
-                PortDetailView(port: selectedPort, onDone: showPortList)
-            } else {
-                portList
+        ZStack {
+            Group {
+                if let selectedPort {
+                    PortDetailView(port: selectedPort, onDone: showPortList)
+                } else {
+                    portList
+                }
+            }
+            .disabled(confirmation != nil)
+            .accessibilityHidden(confirmation != nil)
+
+            if let confirmation {
+                confirmationOverlay(confirmation)
             }
         }
         .frame(width: 420)
@@ -27,12 +35,12 @@ struct PortListView: View {
         }
         .onDisappear {
             selectedPort = nil
+            confirmation = nil
             searchText = ""
             searchIsFocused = false
             viewModel.stopMonitoring()
         }
         .onChange(of: settings.refreshInterval) { _, _ in viewModel.restartMonitoring() }
-        .alert(item: $confirmation, content: confirmationAlert)
         .alert("Action failed", isPresented: actionErrorIsPresented) {
             Button("OK") { viewModel.actionError = nil }
         } message: {
@@ -85,6 +93,15 @@ struct PortListView: View {
                     title: "Some process details are unavailable",
                     message: viewModel.warnings[0],
                     color: .secondary
+                )
+            }
+
+            if !viewModel.tunnelWarnings.isEmpty {
+                statusBanner(
+                    icon: "point.3.connected.trianglepath.dotted",
+                    title: "Tunnel could not be linked",
+                    message: viewModel.tunnelWarnings[0],
+                    color: .orange
                 )
             }
 
@@ -289,6 +306,7 @@ struct PortListView: View {
                             settings: settings,
                             showDetails: { selectedPort = port },
                             requestTermination: { force in requestTermination(port, force: force) },
+                            requestTunnelTermination: requestTunnelTermination,
                             requestContainerStop: requestContainerStop,
                             requestContainerRestart: requestContainerRestart
                         )
@@ -372,15 +390,46 @@ struct PortListView: View {
 
     private func requestTermination(_ port: ResolvedPort, force: Bool) {
         if force || settings.confirmBeforeTerminating {
-            confirmation = Confirmation(kind: .terminate(port, force: force))
+            let signal = force ? "SIGKILL" : "SIGTERM"
+            confirmation = Confirmation(
+                title: force ? "Force quit process?" : "Terminate process?",
+                message: "\(port.listener.process.name) (PID \(port.listener.process.pid)) will receive \(signal). Its identity will be verified first.",
+                actionTitle: force ? "Force Quit" : "Terminate",
+                role: .destructive
+            ) {
+                Task { await viewModel.terminate(port, force: force) }
+            }
         } else {
             Task { await viewModel.terminate(port) }
         }
     }
 
+    private func requestTunnelTermination(_ tunnel: TunnelIdentity, force: Bool) {
+        if force || settings.confirmBeforeTerminating {
+            let signal = force ? "SIGKILL" : "SIGTERM"
+            confirmation = Confirmation(
+                title: force ? "Force quit tunnel?" : "Terminate tunnel?",
+                message: "\(tunnel.provider.displayName) (PID \(tunnel.processID)) will receive \(signal). Its identity will be verified first.",
+                actionTitle: force ? "Force Quit" : "Terminate",
+                role: .destructive
+            ) {
+                Task { await viewModel.terminate(tunnel, force: force) }
+            }
+        } else {
+            Task { await viewModel.terminate(tunnel) }
+        }
+    }
+
     private func requestContainerStop(_ container: DockerContainer) {
         if settings.confirmBeforeStopping {
-            confirmation = Confirmation(kind: .stop(container))
+            confirmation = Confirmation(
+                title: "Stop container?",
+                message: "\(container.name) will be stopped after its container ID is verified.",
+                actionTitle: "Stop",
+                role: .destructive
+            ) {
+                Task { await viewModel.stop(container) }
+            }
         } else {
             Task { await viewModel.stop(container) }
         }
@@ -388,49 +437,64 @@ struct PortListView: View {
 
     private func requestContainerRestart(_ container: DockerContainer) {
         if settings.confirmBeforeStopping {
-            confirmation = Confirmation(kind: .restart(container))
+            confirmation = Confirmation(
+                title: "Restart container?",
+                message: "\(container.name) will be restarted after its container ID is verified.",
+                actionTitle: "Restart",
+                role: nil
+            ) {
+                Task { await viewModel.restart(container) }
+            }
         } else {
             Task { await viewModel.restart(container) }
         }
     }
 
-    private func confirmationAlert(_ confirmation: Confirmation) -> Alert {
-        switch confirmation.kind {
-        case .terminate(let port, let force):
-            let signal = force ? "SIGKILL" : "SIGTERM"
-            return Alert(
-                title: Text(force ? "Force quit process?" : "Terminate process?"),
-                message: Text("\(port.listener.process.name) (PID \(port.listener.process.pid)) will receive \(signal). Its identity will be verified first."),
-                primaryButton: .destructive(Text(force ? "Force Quit" : "Terminate")) {
-                    Task { await viewModel.terminate(port, force: force) }
-                },
-                secondaryButton: .cancel()
-            )
-        case .stop(let container):
-            return Alert(
-                title: Text("Stop container?"),
-                message: Text("\(container.name) will be stopped after its container ID is verified."),
-                primaryButton: .destructive(Text("Stop")) { Task { await viewModel.stop(container) } },
-                secondaryButton: .cancel()
-            )
-        case .restart(let container):
-            return Alert(
-                title: Text("Restart container?"),
-                message: Text("\(container.name) will be restarted after its container ID is verified."),
-                primaryButton: .default(Text("Restart")) { Task { await viewModel.restart(container) } },
-                secondaryButton: .cancel()
-            )
+    private func confirmationOverlay(_ confirmation: Confirmation) -> some View {
+        ZStack {
+            Color.black.opacity(0.45)
+
+            VStack(alignment: .leading, spacing: 18) {
+                Text(confirmation.title)
+                    .font(.title3.weight(.semibold))
+
+                Text(confirmation.message)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 10) {
+                    Button("Cancel") { self.confirmation = nil }
+                        .keyboardShortcut(.cancelAction)
+
+                    Button(confirmation.actionTitle, role: confirmation.role) {
+                        perform(confirmation)
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .padding(24)
+            .frame(width: 320)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(.separator, lineWidth: 1)
+            }
+            .shadow(radius: 24)
+            .accessibilityElement(children: .contain)
         }
+    }
+
+    private func perform(_ confirmation: Confirmation) {
+        self.confirmation = nil
+        confirmation.action()
     }
 }
 
 private struct Confirmation: Identifiable {
     let id = UUID()
-    let kind: Kind
-
-    enum Kind {
-        case terminate(ResolvedPort, force: Bool)
-        case stop(DockerContainer)
-        case restart(DockerContainer)
-    }
+    let title: String
+    let message: String
+    let actionTitle: String
+    let role: ButtonRole?
+    let action: () -> Void
 }

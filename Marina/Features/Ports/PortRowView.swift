@@ -6,6 +6,7 @@ struct PortRowView: View {
     @ObservedObject var settings: MarinaSettings
     let showDetails: () -> Void
     let requestTermination: (Bool) -> Void
+    let requestTunnelTermination: (TunnelIdentity, Bool) -> Void
     let requestContainerStop: (DockerContainer) -> Void
     let requestContainerRestart: (DockerContainer) -> Void
 
@@ -26,6 +27,14 @@ struct PortRowView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+
+                if !port.tunnels.isEmpty {
+                    HStack(spacing: 5) {
+                        ForEach(port.tunnels) { tunnel in
+                            TunnelBadge(tunnel: tunnel)
+                        }
+                    }
+                }
 
                 if settings.showBindAddress {
                     Label(port.listener.primaryBindAddress, systemImage: "network")
@@ -127,6 +136,13 @@ struct PortRowView: View {
         Button("Show Process Details", systemImage: "info.circle", action: showDetails)
         Button("Open Activity Monitor", systemImage: "waveform.path.ecg") { openActivityMonitor() }
 
+        if !port.tunnels.isEmpty {
+            Divider()
+            ForEach(port.tunnels) { tunnel in
+                tunnelMenu(tunnel)
+            }
+        }
+
         if let container = port.primaryDockerContainer {
             Divider()
             Button("Copy Container Name", systemImage: "doc.on.doc") { copy(container.name) }
@@ -143,6 +159,36 @@ struct PortRowView: View {
             Button("Force Quit Process…", systemImage: "exclamationmark.octagon", role: .destructive) {
                 requestTermination(true)
             }
+        }
+    }
+
+    private func tunnelMenu(_ tunnel: TunnelIdentity) -> some View {
+        Menu {
+            if let actionTitle = tunnel.provider.localInterfaceActionTitle,
+               let localInterfaceURL = tunnel.localInterfaceURL {
+                Button(actionTitle, systemImage: "safari") {
+                    NSWorkspace.shared.open(localInterfaceURL)
+                }
+            }
+            Button(
+                "Open \(tunnel.provider.displayName) Dashboard",
+                systemImage: "arrow.up.right.square"
+            ) {
+                NSWorkspace.shared.open(tunnel.provider.dashboardURL)
+            }
+            Button("Copy Tunnel Command", systemImage: "terminal") { copy(tunnel.command) }
+            Divider()
+            Button("Terminate Tunnel", systemImage: "xmark.circle", role: .destructive) {
+                requestTunnelTermination(tunnel, false)
+            }
+            Button("Force Quit Tunnel…", systemImage: "exclamationmark.octagon", role: .destructive) {
+                requestTunnelTermination(tunnel, true)
+            }
+        } label: {
+            Label(
+                "\(tunnel.provider.displayName) Tunnel",
+                systemImage: "point.3.connected.trianglepath.dotted"
+            )
         }
     }
 

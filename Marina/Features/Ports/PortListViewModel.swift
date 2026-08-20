@@ -8,12 +8,14 @@ final class PortListViewModel: ObservableObject {
     @Published private(set) var lastUpdated: Date?
     @Published private(set) var scanError: String?
     @Published private(set) var warnings: [String] = []
+    @Published private(set) var tunnelWarnings: [String] = []
     @Published var actionError: String?
 
     private let settings: MarinaSettings
     private let portScanner: any PortScanning
     private let dockerResolver: any DockerResolving
     private let serviceResolver: ServiceResolver
+    private let tunnelResolver: TunnelResolver
     private let matcher: DockerPortMatcher
     private let actionController: PortActionController
     private var lastKnownContainers: [DockerContainer] = []
@@ -24,6 +26,7 @@ final class PortListViewModel: ObservableObject {
         portScanner: any PortScanning,
         dockerResolver: any DockerResolving,
         serviceResolver: ServiceResolver = ServiceResolver(),
+        tunnelResolver: TunnelResolver = TunnelResolver(),
         matcher: DockerPortMatcher = DockerPortMatcher(),
         actionController: PortActionController
     ) {
@@ -31,6 +34,7 @@ final class PortListViewModel: ObservableObject {
         self.portScanner = portScanner
         self.dockerResolver = dockerResolver
         self.serviceResolver = serviceResolver
+        self.tunnelResolver = tunnelResolver
         self.matcher = matcher
         self.actionController = actionController
     }
@@ -93,16 +97,22 @@ final class PortListViewModel: ObservableObject {
 
         switch scan {
         case .success(let snapshot):
-            let matches = matcher.match(listeners: snapshot.listeners, containers: lastKnownContainers)
-            ports = snapshot.listeners.map { listener in
+            let tunnelResolution = tunnelResolver.resolve(listeners: snapshot.listeners)
+            let visibleListeners = snapshot.listeners.filter {
+                !tunnelResolution.linkedListenerIDs.contains($0.id)
+            }
+            let matches = matcher.match(listeners: visibleListeners, containers: lastKnownContainers)
+            ports = visibleListeners.map { listener in
                 let candidates = matches[listener.id] ?? []
                 return ResolvedPort(
                     listener: listener,
                     service: serviceResolver.resolve(listener: listener, dockerCandidates: candidates),
-                    dockerCandidates: candidates
+                    dockerCandidates: candidates,
+                    tunnels: tunnelResolution.tunnelsByListenerID[listener.id] ?? []
                 )
             }
             warnings = snapshot.warnings
+            tunnelWarnings = tunnelResolution.warnings
             scanError = nil
             lastUpdated = Date()
         case .failure(let error):
@@ -112,6 +122,10 @@ final class PortListViewModel: ObservableObject {
 
     func terminate(_ port: ResolvedPort, force: Bool = false) async {
         await performAction { try await actionController.terminate(port.listener.process, force: force) }
+    }
+
+    func terminate(_ tunnel: TunnelIdentity, force: Bool = false) async {
+        await performAction { try await actionController.terminate(tunnel.processIdentity, force: force) }
     }
 
     func stop(_ container: DockerContainer) async {

@@ -4,6 +4,19 @@ struct ResolvedPort: Identifiable, Hashable, Sendable {
     let listener: ListeningPort
     let service: ServiceIdentity
     let dockerCandidates: [DockerContainer]
+    let tunnels: [TunnelIdentity]
+
+    init(
+        listener: ListeningPort,
+        service: ServiceIdentity,
+        dockerCandidates: [DockerContainer],
+        tunnels: [TunnelIdentity] = []
+    ) {
+        self.listener = listener
+        self.service = service
+        self.dockerCandidates = dockerCandidates
+        self.tunnels = tunnels
+    }
 
     var id: String { listener.id }
 
@@ -59,6 +72,14 @@ struct ResolvedPort: Identifiable, Hashable, Sendable {
                     mapping.protocolName
                 ])
             }
+        }
+
+        for tunnel in tunnels {
+            searchableValues.append(contentsOf: [
+                tunnel.provider.displayName,
+                tunnel.command,
+                tunnel.originAddress
+            ])
         }
 
         let searchableText = searchableValues.joined(separator: " ")
