@@ -79,19 +79,21 @@ struct TunnelResolver: Sendable {
         }
 
         let addresses = Set(listener.bindAddresses.map { $0.lowercased() })
-        if !addresses.isDisjoint(with: ["*", "0.0.0.0", "::"]) {
-            return true
-        }
+        let matchesIPv4Wildcard = addresses.contains("0.0.0.0") ||
+            (addresses.contains("*") && listener.ipFamilies.contains(.ipv4))
+        let matchesIPv6Wildcard = addresses.contains("::") ||
+            (addresses.contains("*") && listener.ipFamilies.contains(.ipv6))
 
         switch origin.host {
         case "localhost":
-            return !addresses.isDisjoint(with: ["localhost", "127.0.0.1", "::1"])
+            return matchesIPv4Wildcard || matchesIPv6Wildcard ||
+                !addresses.isDisjoint(with: ["localhost", "127.0.0.1", "::1"])
         case "127.0.0.1":
-            return !addresses.isDisjoint(with: ["localhost", "127.0.0.1"])
+            return matchesIPv4Wildcard || !addresses.isDisjoint(with: ["localhost", "127.0.0.1"])
         case "::1":
-            return !addresses.isDisjoint(with: ["localhost", "::1"])
+            return matchesIPv6Wildcard || !addresses.isDisjoint(with: ["localhost", "::1"])
         case "0.0.0.0":
-            return addresses.contains("0.0.0.0")
+            return matchesIPv4Wildcard
         default:
             return false
         }
@@ -147,7 +149,8 @@ struct TunnelResolver: Sendable {
 
         let urlValue = value.contains("://") ? value : "http://\(value)"
         guard let components = URLComponents(string: urlValue),
-              let host = components.host?.lowercased(),
+              let host = components.host?.lowercased()
+                .trimmingCharacters(in: CharacterSet(charactersIn: "[]")),
               Self.localHosts.contains(host) else {
             return nil
         }

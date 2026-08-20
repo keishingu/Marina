@@ -43,7 +43,9 @@ struct TunnelIdentity: Identifiable, Codable, Hashable, Sendable {
 
     var id: String { "\(provider.rawValue)-\(processID)-\(originPort)" }
 
-    var originAddress: String { "\(originHost):\(originPort)" }
+    var originAddress: String {
+        originHost.contains(":") ? "[\(originHost)]:\(originPort)" : "\(originHost):\(originPort)"
+    }
 
     var processIdentity: ProcessIdentity {
         ProcessIdentity(
