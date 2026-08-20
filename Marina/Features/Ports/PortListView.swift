@@ -11,11 +11,19 @@ struct PortListView: View {
     @FocusState private var searchIsFocused: Bool
 
     var body: some View {
-        Group {
-            if let selectedPort {
-                PortDetailView(port: selectedPort, onDone: showPortList)
-            } else {
-                portList
+        ZStack {
+            Group {
+                if let selectedPort {
+                    PortDetailView(port: selectedPort, onDone: showPortList)
+                } else {
+                    portList
+                }
+            }
+            .disabled(confirmation != nil)
+            .accessibilityHidden(confirmation != nil)
+
+            if let confirmation {
+                confirmationOverlay(confirmation)
             }
         }
         .frame(width: 420)
@@ -27,12 +35,12 @@ struct PortListView: View {
         }
         .onDisappear {
             selectedPort = nil
+            confirmation = nil
             searchText = ""
             searchIsFocused = false
             viewModel.stopMonitoring()
         }
         .onChange(of: settings.refreshInterval) { _, _ in viewModel.restartMonitoring() }
-        .alert(item: $confirmation, content: confirmationAlert)
         .alert("Action failed", isPresented: actionErrorIsPresented) {
             Button("OK") { viewModel.actionError = nil }
         } message: {
@@ -40,7 +48,22 @@ struct PortListView: View {
         }
     }
 
+    @ViewBuilder
     private var portList: some View {
+#if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: 12) {
+                portListContent
+            }
+        } else {
+            portListContent
+        }
+#else
+        portListContent
+#endif
+    }
+
+    private var portListContent: some View {
         VStack(spacing: 0) {
             header
             searchField
@@ -73,6 +96,15 @@ struct PortListView: View {
                 )
             }
 
+            ForEach(viewModel.tunnelWarnings, id: \.self) { tunnelWarning in
+                statusBanner(
+                    icon: "point.3.connected.trianglepath.dotted",
+                    title: "Tunnel could not be linked",
+                    message: tunnelWarning,
+                    color: .orange
+                )
+            }
+
             content
             Divider()
             footer
@@ -93,49 +125,102 @@ struct PortListView: View {
                     .contentTransition(.numericText())
             }
             Spacer()
-            Button {
-                Task { await viewModel.refresh() }
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .frame(width: 24, height: 24)
-            }
-            .buttonStyle(.plain)
-            .disabled(viewModel.isRefreshing)
-            .keyboardShortcut("r", modifiers: .command)
-            .help("Refresh ports (⌘R)")
-            .accessibilityLabel(viewModel.isRefreshing ? "Refreshing ports" : "Refresh ports")
-
-            Menu {
-                Button {
-                    showSettings()
-                } label: {
-                    Label("Settings…", systemImage: "gearshape")
-                }
-                .keyboardShortcut(",", modifiers: .command)
-
-                Divider()
-
-                Button(role: .destructive) {
-                    NSApplication.shared.terminate(nil)
-                } label: {
-                    Label("Quit Marina", systemImage: "power")
-                }
-                .keyboardShortcut("q", modifiers: .command)
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .frame(width: 24, height: 24)
-            }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("Marina menu")
-            .accessibilityLabel("Marina menu")
+            headerActions
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
     }
 
+    @ViewBuilder
+    private var headerActions: some View {
+#if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            HStack(spacing: 6) {
+                refreshButton
+                marinaMenu(systemImage: "ellipsis").menuStyle(.button)
+            }
+            .buttonStyle(.glass)
+            .controlSize(.small)
+        } else {
+            HStack(spacing: 10) {
+                refreshButton.buttonStyle(.plain)
+                marinaMenu(systemImage: "ellipsis.circle").menuStyle(.borderlessButton)
+            }
+        }
+#else
+        HStack(spacing: 10) {
+            refreshButton.buttonStyle(.plain)
+            marinaMenu(systemImage: "ellipsis.circle").menuStyle(.borderlessButton)
+        }
+#endif
+    }
+
+    private var refreshButton: some View {
+        Button {
+            Task { await viewModel.refresh() }
+        } label: {
+            Image(systemName: "arrow.clockwise")
+                .frame(width: 24, height: 24)
+        }
+        .disabled(viewModel.isRefreshing)
+        .keyboardShortcut("r", modifiers: .command)
+        .help("Refresh ports (⌘R)")
+        .accessibilityLabel(viewModel.isRefreshing ? "Refreshing ports" : "Refresh ports")
+    }
+
+    private func marinaMenu(systemImage: String) -> some View {
+        Menu {
+            Button {
+                showSettings()
+            } label: {
+                Label("Settings…", systemImage: "gearshape")
+            }
+            .keyboardShortcut(",", modifiers: .command)
+
+            Divider()
+
+            Button(role: .destructive) {
+                NSApplication.shared.terminate(nil)
+            } label: {
+                Label("Quit Marina", systemImage: "power")
+            }
+            .keyboardShortcut("q", modifiers: .command)
+        } label: {
+            Image(systemName: systemImage)
+                .frame(width: 24, height: 24)
+        }
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Marina menu")
+        .accessibilityLabel("Marina menu")
+    }
+
+    @ViewBuilder
     private var searchField: some View {
+#if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            searchFieldContent
+                .glassEffect(
+                    .regular,
+                    in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+                )
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
+        } else {
+            searchFieldContent
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
+        }
+#else
+        searchFieldContent
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .padding(.horizontal, 14)
+            .padding(.bottom, 10)
+#endif
+    }
+
+    private var searchFieldContent: some View {
         HStack(spacing: 7) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
@@ -160,9 +245,6 @@ struct PortListView: View {
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 7)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-        .padding(.horizontal, 14)
-        .padding(.bottom, 10)
     }
 
     private var portCountSummary: String {
@@ -224,6 +306,7 @@ struct PortListView: View {
                             settings: settings,
                             showDetails: { selectedPort = port },
                             requestTermination: { force in requestTermination(port, force: force) },
+                            requestTunnelTermination: requestTunnelTermination,
                             requestContainerStop: requestContainerStop,
                             requestContainerRestart: requestContainerRestart
                         )
@@ -307,15 +390,46 @@ struct PortListView: View {
 
     private func requestTermination(_ port: ResolvedPort, force: Bool) {
         if force || settings.confirmBeforeTerminating {
-            confirmation = Confirmation(kind: .terminate(port, force: force))
+            let signal = force ? "SIGKILL" : "SIGTERM"
+            confirmation = Confirmation(
+                title: force ? "Force quit process?" : "Terminate process?",
+                message: "\(port.listener.process.name) (PID \(port.listener.process.pid)) will receive \(signal). Its identity will be verified first.",
+                actionTitle: force ? "Force Quit" : "Terminate",
+                role: .destructive
+            ) {
+                Task { await viewModel.terminate(port, force: force) }
+            }
         } else {
             Task { await viewModel.terminate(port) }
         }
     }
 
+    private func requestTunnelTermination(_ tunnel: TunnelIdentity, force: Bool) {
+        if force || settings.confirmBeforeTerminating {
+            let signal = force ? "SIGKILL" : "SIGTERM"
+            confirmation = Confirmation(
+                title: force ? "Force quit tunnel?" : "Terminate tunnel?",
+                message: "\(tunnel.provider.displayName) (PID \(tunnel.processID)) will receive \(signal). Its identity will be verified first.",
+                actionTitle: force ? "Force Quit" : "Terminate",
+                role: .destructive
+            ) {
+                Task { await viewModel.terminate(tunnel, force: force) }
+            }
+        } else {
+            Task { await viewModel.terminate(tunnel) }
+        }
+    }
+
     private func requestContainerStop(_ container: DockerContainer) {
         if settings.confirmBeforeStopping {
-            confirmation = Confirmation(kind: .stop(container))
+            confirmation = Confirmation(
+                title: "Stop container?",
+                message: "\(container.name) will be stopped after its container ID is verified.",
+                actionTitle: "Stop",
+                role: .destructive
+            ) {
+                Task { await viewModel.stop(container) }
+            }
         } else {
             Task { await viewModel.stop(container) }
         }
@@ -323,49 +437,64 @@ struct PortListView: View {
 
     private func requestContainerRestart(_ container: DockerContainer) {
         if settings.confirmBeforeStopping {
-            confirmation = Confirmation(kind: .restart(container))
+            confirmation = Confirmation(
+                title: "Restart container?",
+                message: "\(container.name) will be restarted after its container ID is verified.",
+                actionTitle: "Restart",
+                role: nil
+            ) {
+                Task { await viewModel.restart(container) }
+            }
         } else {
             Task { await viewModel.restart(container) }
         }
     }
 
-    private func confirmationAlert(_ confirmation: Confirmation) -> Alert {
-        switch confirmation.kind {
-        case .terminate(let port, let force):
-            let signal = force ? "SIGKILL" : "SIGTERM"
-            return Alert(
-                title: Text(force ? "Force quit process?" : "Terminate process?"),
-                message: Text("\(port.listener.process.name) (PID \(port.listener.process.pid)) will receive \(signal). Its identity will be verified first."),
-                primaryButton: .destructive(Text(force ? "Force Quit" : "Terminate")) {
-                    Task { await viewModel.terminate(port, force: force) }
-                },
-                secondaryButton: .cancel()
-            )
-        case .stop(let container):
-            return Alert(
-                title: Text("Stop container?"),
-                message: Text("\(container.name) will be stopped after its container ID is verified."),
-                primaryButton: .destructive(Text("Stop")) { Task { await viewModel.stop(container) } },
-                secondaryButton: .cancel()
-            )
-        case .restart(let container):
-            return Alert(
-                title: Text("Restart container?"),
-                message: Text("\(container.name) will be restarted after its container ID is verified."),
-                primaryButton: .default(Text("Restart")) { Task { await viewModel.restart(container) } },
-                secondaryButton: .cancel()
-            )
+    private func confirmationOverlay(_ confirmation: Confirmation) -> some View {
+        ZStack {
+            Color.black.opacity(0.45)
+
+            VStack(alignment: .leading, spacing: 18) {
+                Text(confirmation.title)
+                    .font(.title3.weight(.semibold))
+
+                Text(confirmation.message)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 10) {
+                    Button("Cancel") { self.confirmation = nil }
+                        .keyboardShortcut(.cancelAction)
+
+                    Button(confirmation.actionTitle, role: confirmation.role) {
+                        perform(confirmation)
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .padding(24)
+            .frame(width: 320)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(.separator, lineWidth: 1)
+            }
+            .shadow(radius: 24)
+            .accessibilityElement(children: .contain)
         }
+    }
+
+    private func perform(_ confirmation: Confirmation) {
+        self.confirmation = nil
+        confirmation.action()
     }
 }
 
 private struct Confirmation: Identifiable {
     let id = UUID()
-    let kind: Kind
-
-    enum Kind {
-        case terminate(ResolvedPort, force: Bool)
-        case stop(DockerContainer)
-        case restart(DockerContainer)
-    }
+    let title: String
+    let message: String
+    let actionTitle: String
+    let role: ButtonRole?
+    let action: () -> Void
 }

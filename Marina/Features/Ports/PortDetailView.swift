@@ -35,6 +35,24 @@ struct PortDetailView: View {
                         detailRow("Working directory", port.listener.process.workingDirectory)
                     }
 
+                    if !port.tunnels.isEmpty {
+                        Divider()
+                        Text(port.tunnels.count == 1 ? "Tunnel" : "Tunnels")
+                            .font(.headline)
+                        ForEach(port.tunnels) { tunnel in
+                            VStack(alignment: .leading, spacing: 5) {
+                                TunnelBadge(tunnel: tunnel)
+                                Text("Publishes \(tunnel.originAddress)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text(tunnel.command)
+                                    .font(.caption.monospaced())
+                                    .textSelection(.enabled)
+                                    .lineLimit(2)
+                            }
+                        }
+                    }
+
                     if !port.dockerCandidates.isEmpty {
                         Divider()
                         Text(port.dockerCandidates.count == 1 ? "Docker container" : "Possible Docker containers")

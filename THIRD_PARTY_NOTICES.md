@@ -5,6 +5,7 @@
 Marina includes selected SVG paths from [Simple Icons 16.21.0](https://github.com/simple-icons/simple-icons/tree/16.21.0):
 
 - Caddy
+- Cloudflare
 - Django
 - Docker
 - Go
@@ -12,6 +13,7 @@ Marina includes selected SVG paths from [Simple Icons 16.21.0](https://github.co
 - Next.js
 - NGINX
 - Node.js
+- ngrok
 - OpenJDK
 - PostgreSQL
 - Python
