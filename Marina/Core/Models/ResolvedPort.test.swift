@@ -23,7 +23,23 @@ final class ResolvedPortTests: XCTestCase {
         XCTAssertTrue(makePort().matches(searchText: "   "))
     }
 
-    private func makePort() -> ResolvedPort {
+    func test_トンネルのプロバイダーとコマンドで検索できる() {
+        let tunnel = TunnelIdentity(
+            provider: .ngrok,
+            processID: 90,
+            command: "ngrok http 3000",
+            originHost: "localhost",
+            originPort: 3_000,
+            localInterfacePort: 4_040
+        )
+
+        let port = makePort(tunnels: [tunnel])
+
+        XCTAssertTrue(port.matches(searchText: "ngrok"))
+        XCTAssertTrue(port.matches(searchText: "ngrok http"))
+    }
+
+    private func makePort(tunnels: [TunnelIdentity] = []) -> ResolvedPort {
         let listener = ListeningPort(
             process: ProcessIdentity(
                 pid: 48_291,
@@ -58,7 +74,8 @@ final class ResolvedPortTests: XCTestCase {
         return ResolvedPort(
             listener: listener,
             service: ServiceIdentity(kind: .nextJS, confidence: .high),
-            dockerCandidates: [container]
+            dockerCandidates: [container],
+            tunnels: tunnels
         )
     }
 }

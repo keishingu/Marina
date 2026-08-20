@@ -66,7 +66,8 @@ Marina/
 │   ├── Models/             Listener、プロセス、サービス、コンテナのモデル
 │   ├── PortScanner/        lsofフィールド解析と正規化
 │   ├── ProcessResolver/    ps/lsofによるプロセスメタデータの補完
-│   └── ServiceResolver/    控えめなサービス推定
+│   ├── ServiceResolver/    控えめなサービス推定
+│   └── TunnelResolver/     ngrok/Cloudflareの公開元照合
 └── DesignSystem/           サービスロゴ、SF Symbolフォールバック、状態表示
 ```
 
@@ -87,6 +88,12 @@ Marinaは`Foundation.Process`を介して、明示的な引数とともに`/usr/
 - `/usr/sbin/lsof -a -p <pid> -d cwd -Fn`
 
 同じPID、ホストポート、プロトコルに属するIPv4とIPv6のソケットは、すべてのバインドアドレスとアドレスファミリを保持したまま、1つのlistenerに正規化されます。結果はポートの昇順で並びます。
+
+## トンネル連携
+
+Marinaは一般的な`ngrok http <port>`と`cloudflared tunnel --url <local URL>`コマンドを認識します。指定された公開元が実際にLISTEN中の場合、プロバイダーのバッジと専用メニューを公開元サービスへ表示します。ngrokのInspectorやcloudflaredのmetrics listenerは、無関係なポートとして並べず公開元へ畳み込みます。
+
+専用メニューからプロバイダーのダッシュボードを開き、実行中のコマンドをコピーできます。ngrokがローカルのTraffic Inspectorを公開している場合は、その画面も開けます。named tunnelや公開元ポートを特定できない場合は推測せず、管理用listenerを残したままトンネル固有の警告を表示します。
 
 ## Docker連携
 
