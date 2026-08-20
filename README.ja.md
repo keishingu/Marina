@@ -22,11 +22,11 @@ Marinaは、ローカルで待ち受けているTCPポート、その所有プ�
 
 ## ダウンロード
 
-[GitHub Releases](https://github.com/keishingu/Marina/releases/latest)から最新の`Marina-macos-universal.zip`をダウンロードして展開し、`Marina.app`をアプリケーションフォルダへ移動してください。UniversalビルドはApple SiliconとIntel Macの両方に対応し、Marinaのアプリアイコンも含まれています。
+[GitHub Releases](https://github.com/keishingu/Marina/releases/latest)から最新の`Marina-macos-universal.dmg`をダウンロードして開き、`Marina.app`をアプリケーションフォルダへドラッグしてください。UniversalビルドはApple SiliconとIntel Macの両方に対応し、Marinaのアプリアイコンも含まれています。
 
-配布ビルドはDeveloper ID Application証明書で署名され、Appleのnotarization（公証）を受けています。公証ticketも`Marina.app`へstapleされているため、通常のアプリと同じようにFinderから起動できます。
+配布ビルドとディスクイメージはDeveloper ID Application証明書で署名され、Appleのnotarization（公証）を受けています。公証ticketもディスクイメージへstapleされているため、通常のアプリと同じようにFinderからインストールして起動できます。
 
-Pull Requestのマージを含め、`main`へpushされるたびにリリース構成がビルドされ、バージョン付きのGitHub Releaseが自動公開されます。ZIPと一緒に`Marina-macos-universal.zip.sha256`としてチェックサムも提供されます。
+Pull Requestのマージを含め、`main`へpushされるたびにリリース構成がビルドされ、バージョン付きのGitHub Releaseが自動公開されます。ディスクイメージと一緒に`Marina-macos-universal.dmg.sha256`としてチェックサムも提供されます。
 
 ## ビルドとテスト
 
