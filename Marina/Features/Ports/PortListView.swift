@@ -96,11 +96,11 @@ struct PortListView: View {
                 )
             }
 
-            if !viewModel.tunnelWarnings.isEmpty {
+            ForEach(viewModel.tunnelWarnings, id: \.self) { tunnelWarning in
                 statusBanner(
                     icon: "point.3.connected.trianglepath.dotted",
                     title: "Tunnel could not be linked",
-                    message: viewModel.tunnelWarnings[0],
+                    message: tunnelWarning,
                     color: .orange
                 )
             }
