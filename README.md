@@ -22,11 +22,11 @@ The screenshot is rendered from the production SwiftUI view with deterministic f
 
 ## Download
 
-Download the latest `Marina-macos-universal.zip` from [GitHub Releases](https://github.com/keishingu/Marina/releases/latest), extract it, and move `Marina.app` to the Applications folder. The Universal build supports both Apple Silicon and Intel Macs and includes the Marina app icon.
+Download the latest `Marina-macos-universal.dmg` from [GitHub Releases](https://github.com/keishingu/Marina/releases/latest), open it, and drag `Marina.app` to the Applications folder. The Universal build supports both Apple Silicon and Intel Macs and includes the Marina app icon.
 
-Release builds are signed with a Developer ID Application certificate and notarized by Apple. The notarization ticket is also stapled to `Marina.app`, so you can launch it from Finder like a regular macOS app.
+Release builds and disk images are signed with a Developer ID Application certificate and notarized by Apple. The notarization ticket is also stapled to the disk image, so you can install and launch Marina from Finder like a regular macOS app.
 
-Each push to `main` (including a merged pull request) builds the Release configuration and publishes a versioned GitHub Release automatically. A checksum is provided alongside the ZIP as `Marina-macos-universal.zip.sha256`.
+Each push to `main` (including a merged pull request) builds the Release configuration and publishes a versioned GitHub Release automatically. A checksum is provided alongside the disk image as `Marina-macos-universal.dmg.sha256`.
 
 ## Build and test
 

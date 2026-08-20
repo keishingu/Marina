@@ -7,7 +7,7 @@ readonly project_directory="$(cd "${script_directory}/.." && pwd)"
 readonly output_directory="${project_directory}/build/release"
 readonly derived_data_directory="${output_directory}/DerivedData"
 readonly app_path="${derived_data_directory}/Build/Products/Release/Marina.app"
-readonly archive_path="${output_directory}/Marina-macos-universal.zip"
+readonly disk_image_path="${output_directory}/Marina-macos-universal.dmg"
 readonly build_number="${BUILD_NUMBER:?error: BUILD_NUMBER が指定されていません}"
 readonly signing_identity="${SIGNING_IDENTITY:?error: SIGNING_IDENTITY が指定されていません}"
 
@@ -61,7 +61,7 @@ codesign --display --verbose=4 "${app_path}"
 
 "${script_directory}/package-macos-release.sh"
 
-echo "Created ${archive_path}"
+echo "Created ${disk_image_path}"
 echo "Architectures: ${architectures}"
 echo "App icon: ${icon_path}"
 echo "Signing identity: ${signing_identity}"

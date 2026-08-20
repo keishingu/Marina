@@ -28,6 +28,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Python for DMG packaging
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install DMG packaging dependency
+        run: python -m pip install -r scripts/requirements-dmg.txt
+
       - name: Validate Apple distribution configuration
         env:
           APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
@@ -130,7 +138,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
         run: ./scripts/build-macos-release.sh
 
-      - name: Notarize and staple macOS app
+      - name: Notarize and staple macOS disk image
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ vars.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
@@ -139,8 +147,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          app_path="build/release/DerivedData/Build/Products/Release/Marina.app"
-          archive_path="build/release/Marina-macos-universal.zip"
+          disk_image_path="build/release/Marina-macos-universal.dmg"
           api_key_path="${RUNNER_TEMP}/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
           result_path="${RUNNER_TEMP}/notarization-result.json"
           trap 'rm -f "${api_key_path}" "${result_path}"' EXIT
@@ -150,7 +157,7 @@ jobs:
           chmod 600 "${api_key_path}"
 
           submit_exit=0
-          xcrun notarytool submit "${archive_path}" \
+          xcrun notarytool submit "${disk_image_path}" \
             --key "${api_key_path}" \
             --key-id "${APP_STORE_CONNECT_KEY_ID}" \
             --issuer "${APP_STORE_CONNECT_ISSUER_ID}" \
@@ -173,11 +180,23 @@ jobs:
             exit 1
           fi
 
-          xcrun stapler staple "${app_path}"
-          xcrun stapler validate "${app_path}"
-          spctl --assess --type execute --verbose=4 "${app_path}"
+          xcrun stapler staple "${disk_image_path}"
+          xcrun stapler validate "${disk_image_path}"
+          codesign --verify --verbose=2 "${disk_image_path}"
+          hdiutil verify "${disk_image_path}"
+          spctl \
+            --assess \
+            --type open \
+            --context context:primary-signature \
+            --verbose=4 \
+            "${disk_image_path}"
 
-          ./scripts/package-macos-release.sh
+          (
+            cd build/release
+            shasum -a 256 Marina-macos-universal.dmg \
+              > Marina-macos-universal.dmg.sha256
+            shasum -a 256 -c Marina-macos-universal.dmg.sha256
+          )
 
       - name: Upload notarized test artifact
         if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
@@ -185,8 +204,8 @@ jobs:
         with:
           name: Marina-macos-notarized-${{ github.run_number }}
           path: |
-            build/release/Marina-macos-universal.zip
-            build/release/Marina-macos-universal.zip.sha256
+            build/release/Marina-macos-universal.dmg
+            build/release/Marina-macos-universal.dmg.sha256
           if-no-files-found: error
           retention-days: 7
 
@@ -219,8 +238,8 @@ jobs:
           set -euo pipefail
 
           asset_paths=(
-            build/release/Marina-macos-universal.zip
-            build/release/Marina-macos-universal.zip.sha256
+            build/release/Marina-macos-universal.dmg
+            build/release/Marina-macos-universal.dmg.sha256
           )
 
           release_state="$(

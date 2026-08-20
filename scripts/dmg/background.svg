@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="400" viewBox="0 0 660 400">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7fcfe"/>
+      <stop offset="1" stop-color="#e8f5f8"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8bd2dc" stop-opacity="0.28"/>
+      <stop offset="0.5" stop-color="#37aebc" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#76c8d3" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2aa8b8"/>
+      <stop offset="1" stop-color="#167f91"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0a5360" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="660" height="400" fill="url(#sky)"/>
+
+  <g fill="none" stroke="url(#water)" stroke-width="2">
+    <path d="M-20 320 C55 292 105 345 180 317 S305 292 380 319 S505 345 580 316 S705 292 740 315"/>
+    <path d="M-35 344 C35 318 95 365 165 340 S290 316 360 342 S485 365 555 339 S680 317 730 338" opacity="0.8"/>
+    <path d="M-10 370 C65 342 115 392 190 366 S315 342 390 367 S515 392 590 364 S715 342 750 365" opacity="0.55"/>
+  </g>
+
+  <text x="330" y="54" text-anchor="middle" fill="#153f47"
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
+        font-size="26" font-weight="650" letter-spacing="0.3">Install Marina</text>
+  <text x="330" y="82" text-anchor="middle" fill="#527078"
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
+        font-size="14">Drag Marina to the Applications folder</text>
+
+  <g filter="url(#shadow)">
+    <path d="M319 178 L341 194 L319 210" fill="none" stroke="url(#arrow)" stroke-width="8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+</svg>

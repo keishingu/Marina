@@ -1,6 +1,6 @@
 # Apple Developer署名とnotarizationの設定
 
-GitHub ActionsからMarinaを直接配布するために、Developer ID Application証明書で署名し、Appleのnotary serviceへ提出します。notarizationがAcceptedになった後、ticketを`Marina.app`へstapleしてから配布用ZIPとchecksumを作り直します。
+GitHub ActionsからMarinaを直接配布するために、`Marina.app`と配布用DMGをDeveloper ID Application証明書で署名し、DMGをAppleのnotary serviceへ提出します。notarizationがAcceptedになった後、ticketをDMGへstapleし、最終checksumを作り直します。
 
 ## 必要なApple Developer資材
 
@@ -12,7 +12,7 @@ Apple Developer ProgramのAccount Holderが次を準備します。
 4. Apple Developer Team ID
 5. API Key IDとIssuer ID
 
-`Developer ID Installer`証明書は不要です。Marinaはinstaller packageではなくZIPで配布します。
+`Developer ID Installer`証明書は不要です。Marinaはinstaller packageではなく署名済みDMGで配布します。
 
 ## Developer ID Application証明書
 
@@ -82,7 +82,7 @@ passwordは2番目のコマンドが表示するpromptへ入力します。`.p12
 
 VariablesとSecretsを登録した後、GitHub Actionsの「Release macOS app」から`Run workflow`を選び、署名・notarization対応ブランチを指定して手動実行します。
 
-feature branchの手動実行ではGitHub Releaseを作成せず、Developer ID署名、notarization、staple、再packageまでを実行し、7日間保持される`Marina-macos-notarized-*` artifactを作成します。
+feature branchの手動実行ではGitHub Releaseを作成せず、Developer ID署名、DMG作成、notarization、staple、checksum再作成までを実行し、7日間保持される`Marina-macos-notarized-*` artifactを作成します。
 
 workflowが成功したらartifactをdownloadし、「配布物の確認」のコマンドを実行してください。実機で通常起動できることも確認してから`main`へmergeします。
 
@@ -94,27 +94,37 @@ workflowが成功したらartifactをdownloadし、「配布物の確認」の�
 2. 一時Keychainの作成とDeveloper ID Application証明書のimport
 3. テスト
 4. Universal binaryのbuild
-5. Hardened Runtimeとsecure timestamp付きDeveloper ID署名
-6. ZIPを`notarytool submit --wait`で送信
-7. `Accepted`の明示確認
-8. notarization ticketのstapleと検証
-9. staple済みアプリからZIPとchecksumを再生成
-10. feature branchの手動実行では検証用artifact、`main`ではGitHub Releaseを公開
-11. 一時Keychainの削除
+5. アプリをHardened Runtimeとsecure timestamp付きでDeveloper ID署名
+6. `dmgbuild`でApplicationsフォルダへのdrag-and-drop画面を持つDMGを作成
+7. DMGをsecure timestamp付きでDeveloper ID署名
+8. DMGを`notarytool submit --wait`で送信
+9. `Accepted`の明示確認
+10. notarization ticketをDMGへstapleして検証
+11. staple後のDMGからchecksumを再生成
+12. feature branchの手動実行では検証用artifact、`main`ではGitHub Releaseを公開
+13. 一時Keychainの削除
+
+DMGのレイアウトは`scripts/dmg/settings.py`、背景は`scripts/dmg/background.png`とRetina用の`scripts/dmg/background@2x.png`で管理します。CIは`scripts/requirements-dmg.txt`に固定した`dmgbuild`を使用し、FinderやAppleScriptへ依存せず`.DS_Store`とマルチ解像度TIFFを構成します。
 
 設定が不足している場合やnotarizationがAccepted以外の場合は、Releaseを公開せずworkflowを失敗させます。
 
 ## 配布物の確認
 
-GitHub ReleaseからZIPをdownloadして展開した後、次を実行します。
+GitHub ReleaseからDMGをdownloadした後、次を実行します。
 
 ```sh
-codesign --verify --deep --strict --verbose=2 Marina.app
-spctl --assess --type execute --verbose=4 Marina.app
-xcrun stapler validate Marina.app
+hdiutil verify Marina-macos-universal.dmg
+codesign --verify --verbose=2 Marina-macos-universal.dmg
+xcrun stapler validate Marina-macos-universal.dmg
+spctl \
+  --assess \
+  --type open \
+  --context context:primary-signature \
+  --verbose=4 \
+  Marina-macos-universal.dmg
 ```
 
-`codesign`が成功し、`spctl`が`accepted`、`stapler`がvalidation successを返すことを確認します。
+`hdiutil`と`codesign`が成功し、`spctl`が`accepted`、`stapler`がvalidation successを返すことを確認します。DMGをFinderで開き、`Marina.app`とApplicationsフォルダへのリンクが指定位置に表示され、ドラッグ後のアプリが通常起動できることも確認します。
 
 ## 公式資料
 
